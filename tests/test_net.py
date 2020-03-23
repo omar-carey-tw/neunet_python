@@ -32,3 +32,30 @@ class TestNet:
 
         for i in range(len(a_l)):
             assert len(a_l[i]) == l_nodes[i]
+
+    def test_train(self):
+        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5,10))
+        neu_net = NeuNet(l_nodes)
+
+        amount_data = 50
+        training_iter = 100
+
+        train_data = [0] * amount_data
+        train_labels = [0] * amount_data
+
+        for i in range(amount_data):
+            train_data[i] = np.random.uniform(size = (l_nodes[0], 1))
+            train_labels[i] = np.random.uniform(size = (l_nodes[-1], 1))
+
+        old_weights = neu_net.weights
+        old_bias = neu_net.bias
+
+        neu_net.train(train_data, train_labels, training_iter)
+
+        new_weights = neu_net.weights
+        new_bias = neu_net.bias
+
+        for i in range(len(new_bias)):
+
+            assert old_weights[i] != new_weights[i]
+            assert old_bias[i] != new_bias[i]

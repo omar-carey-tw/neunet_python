@@ -6,7 +6,16 @@ import numpy as np
 # mndata = MNIST(PATH)
 # images, labels = mndata.load_training()
 
-w = np.random.uniform(size=(3,4))
+def act(y):
+        # sigmoid
+        return 1/(1+np.exp(-y))
+
+w = np.random.uniform(size=(4,1))
 a = np.random.uniform(size=(4,1))
 
-print(np.dot(w,a))
+# print(w)
+# print(w**2)
+# print(act(w))
+
+for i in range(10,1,-1):
+    print(i)
