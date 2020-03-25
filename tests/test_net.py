@@ -50,12 +50,16 @@ class TestNet:
         old_weights = neu_net.weights
         old_bias = neu_net.bias
 
-        neu_net.train(train_data, train_labels, training_iter)
+        cost_testing = neu_net.train(train_data, train_labels, training_iter)
 
         new_weights = neu_net.weights
         new_bias = neu_net.bias
 
-        for i in range(len(new_bias)):
+        assert cost_testing[-1] != cost_testing[0]
+        
+        # for i in range(len(new_bias)):
 
-            assert old_weights[i] != new_weights[i]
-            assert old_bias[i] != new_bias[i]
+        #     np.testing.assert_raises(AssertionError, np.testing.assert_array_equal, old_weights[i], new_weights[i])
+        #     np.testing.assert_raises(AssertionError, np.testing.assert_array_equal, old_bias[i], new_bias[i])
+
+            

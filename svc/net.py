@@ -4,7 +4,7 @@ import random
 
 from typing import *
 
-
+# took out dividing by batch_size in back_prop method (should be in there I think? More investigation)
 class NeuNet:
     """
         Attributes:
@@ -77,6 +77,7 @@ class NeuNet:
                 expect is an array of the expected data
         """
         Cost = [0.0] * training_iter
+        train_batch_size = len(train_data)
 
         for iter in range(training_iter):
             cost_iter = 0
@@ -86,28 +87,39 @@ class NeuNet:
                 a_l = self.eval(data)
                 z_l = self.eval_weighted(data)
 
+                cost_iter += np.sum(self.cost(a_l[-1], train_labels[i]))
 
-                self.__back_prop(a_l, z_l, train_labels[i], learn_rate, train_batch_size=len(train_data))
+                self.back_prop(a_l, z_l, train_labels[i], learn_rate, train_batch_size)
         
+
+            Cost[iter] = cost_iter / train_batch_size
+            print(f"{Cost[iter]}, {iter}")
 
         return Cost
 
 
-    def __back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
+    def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
      learning_rate: float, train_batch_size: int):
 
-        layer_error = self.__output_error(act_layers[-1], weight_layers[-1], train_label)
+        layer_error = self.output_error(act_layers[-1], weight_layers[-1], train_label)
         weight_error = np.dot(layer_error, act_layers[-2].transpose())
 
-        self.weights[-1] = self.weights[-1] - weight_error * (learning_rate / train_batch_size)
-        self.bias[-1] = self.bias[-1] - layer_error * (learning_rate / train_batch_size)
+        self.weights[-1] -= weight_error * learning_rate
+        self.bias[-1] -= layer_error * learning_rate 
 
 
+        for i in range(self.layers-1 , 1, -1):
+
+            layer_error = self.dact(weight_layers[i-1]) * np.dot(self.weights[i-1].transpose(), layer_error)
+            weight_error = np.dot(layer_error, act_layers[i-2].transpose())
+
+            self.weights[i-2] -= weight_error * learning_rate 
+            self.bias[i-2] -= layer_error * learning_rate 
          
 
 
 
-    def __output_error(self,output_act: np.array, output_weighted: np.array, train_label: np.array) -> np.array:
+    def output_error(self,output_act: np.array, output_weighted: np.array, train_label: np.array) -> np.array:
 
         return self.dcost(output_act, train_label)*self.dact(output_weighted)
 
