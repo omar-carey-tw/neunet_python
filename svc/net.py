@@ -1,8 +1,6 @@
 import numpy as np
-import math
-import random
-
 from typing import *
+
 
 # took out dividing by batch_size in back_prop method (should be in there I think? More investigation)
 class NeuNet:
@@ -13,7 +11,7 @@ class NeuNet:
         weights: list of arrays of weight matrices
     """
 
-    def __init__(self,l_nodes: List[int]) -> None:
+    def __init__(self, l_nodes: List[int]) -> None:
 
         self.l_nodes = l_nodes
         self.layers = len(l_nodes)
@@ -25,121 +23,110 @@ class NeuNet:
             _weights = []
             _bias = []
 
-            for i in range(1,self.layers):
-                _weights.append(np.random.uniform(size=(self.l_nodes[i],self.l_nodes[i-1])))
-                _bias.append(np.random.uniform(size=(self.l_nodes[i],1)))
+            for i in range(1, self.layers):
+                _weights.append(np.random.uniform(size=(self.l_nodes[i], self.l_nodes[i - 1])))
+                _bias.append(np.random.uniform(size=(self.l_nodes[i], 1)))
 
         self.weights = _weights
         self.bias = _bias
 
-
-    def eval(self, inputs: List[float]) -> List[np.array]:
+    def eval(self, inputs: np.array) -> np.array:
         """
             Evaluates activation layers
         """
 
         if len(inputs) != self.l_nodes[0]:
             print("input size not compatible with network")
-            return 
+            return []
         else:
 
-            a_l = [0]*self.layers
+            a_l = [0.0]*self.layers
             a_l[0] = self.act(inputs)
 
-            for i in range(1,self.layers):
-                a_l[i] = np.dot(self.weights[i-1], self.act(a_l[i-1])) + self.bias[i-1]
+            for i in range(1, self.layers):
+                a_l[i] = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])
 
         return a_l
 
-    def eval_weighted(self, inputs: List[float]) -> List[np.array]:
+    def eval_weighted(self, inputs: List[float]) -> np.array:
         """
             Evaluates weighted sum layers
         """
 
         if len(inputs) != self.l_nodes[0]:
             print("input size not compatible with network")
-            return 
+            return []
         else:
 
             z_l = [0]*self.layers
             z_l[0] = inputs
 
-            for i in range(1,self.layers):
-                z_l[i] = np.dot(self.weights[i-1], z_l[i-1]) + self.bias[i-1]
+            for i in range(1, self.layers):
+                z_l[i] = np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
 
         return z_l
 
-
-    def train(self, train_data: List[np.array] ,train_labels: List[np.array] ,training_iter: int, learn_rate = 0.5) -> List[float]:
+    def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5) -> \
+            np.array:
         """ 
             Trains neural net by backpropagation using given data:
                 is a list of lists where each list contains data
                 expect is an array of the expected data
         """
-        Cost = [0.0] * training_iter
+        cost = np.zeros(shape=(training_iter, 1))
         train_batch_size = len(train_data)
 
-        for iter in range(training_iter):
+        for index in range(training_iter):
             cost_iter = 0
 
             for i, data in enumerate(train_data):
-
                 a_l = self.eval(data)
                 z_l = self.eval_weighted(data)
+
+                # print(a_l[0],a_l[-1])
+                # print(z_l[0],z_l[-1])
 
                 cost_iter += np.sum(self.cost(a_l[-1], train_labels[i]))
 
                 self.back_prop(a_l, z_l, train_labels[i], learn_rate, train_batch_size)
-        
 
-            Cost[iter] = cost_iter / train_batch_size
-            print(f"{Cost[iter]}, {iter}")
+            cost[index] = cost_iter / train_batch_size
+            # print(f"{Cost[iter]}, {iter}")
 
-        return Cost
-
+        return cost
 
     def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
-     learning_rate: float, train_batch_size: int):
+                  learning_rate: float, train_batch_size: int):
 
         layer_error = self.output_error(act_layers[-1], weight_layers[-1], train_label)
         weight_error = np.dot(layer_error, act_layers[-2].transpose())
 
         self.weights[-1] -= weight_error * learning_rate
-        self.bias[-1] -= layer_error * learning_rate 
+        self.bias[-1] -= layer_error * learning_rate
 
+        for i in range(self.layers - 1, 1, -1):
+            layer_error = self.dact(weight_layers[i - 1]) * np.dot(self.weights[i - 1].transpose(), layer_error)
+            weight_error = np.dot(layer_error, act_layers[i - 2].transpose())
 
-        for i in range(self.layers-1 , 1, -1):
+            self.weights[i - 2] -= weight_error * learning_rate
+            self.bias[i - 2] -= layer_error * learning_rate
 
-            layer_error = self.dact(weight_layers[i-1]) * np.dot(self.weights[i-1].transpose(), layer_error)
-            weight_error = np.dot(layer_error, act_layers[i-2].transpose())
+    def output_error(self, output_act: np.array, output_weighted: np.array, train_label: np.array) -> np.array:
 
-            self.weights[i-2] -= weight_error * learning_rate 
-            self.bias[i-2] -= layer_error * learning_rate 
-         
-
-
-
-    def output_error(self,output_act: np.array, output_weighted: np.array, train_label: np.array) -> np.array:
-
-        return self.dcost(output_act, train_label)*self.dact(output_weighted)
-
+        return self.dcost(output_act, train_label) * self.dact(output_weighted)
 
     def act(self, y):
         # sigmoid
-        return 1/(1+np.exp(-y))
+        return 1 / (1 + np.exp(-y))
 
-    def dact(self,y):
+    def dact(self, y):
         # derivative of sigmoid
-        return self.act(y)*(1-self.act(y))
+        return self.act(y) * (1 - self.act(y))
 
     def cost(self, output_act: np.array, training_label) -> np.array:
         # cost for parabolic 
-        return 0.5*(output_act - training_label)**2
+        return 0.5 * (output_act - training_label) ** 2
 
     def dcost(self, output_act: np.array, training_label) -> np.array:
         # derivative of parabolic cost
         return output_act - training_label
-
-
-    
-        

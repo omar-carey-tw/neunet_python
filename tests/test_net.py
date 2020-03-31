@@ -55,7 +55,7 @@ class TestNet:
         new_weights = neu_net.weights
         new_bias = neu_net.bias
 
-        assert cost_testing[-1] != cost_testing[0]
+        assert cost_testing[-1] <= cost_testing[0]
         
         # for i in range(len(new_bias)):
 

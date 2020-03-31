@@ -1,33 +1,35 @@
 from svc.net import *
-from typing import *
 
-import numpy as np
 import matplotlib.pyplot as plt
 from svc.data import data
 
 
-l_nodes = [784,15,10]
-neu_net = NeuNet(l_nodes)
-old_weights = neu_net.weights
-old_bias = neu_net.bias
+if __name__ == '__main__':
 
-training_iter = 100
-images = data[0]
-labels = data[1]
+    l_nodes = [784, 15, 10]
+    neu_net = NeuNet(l_nodes)
+    old_weights = neu_net.weights
+    old_bias = neu_net.bias
 
-cost = neu_net.train(images, labels, training_iter)
+    training_iter = 1
+    data_amount = 1000
 
-new_weights = neu_net.weights
-new_bias = neu_net.bias
+    images = data[0][0:data_amount]
+    labels = data[1][0:data_amount]
 
-plt.plot(list(range(training_iter)), cost)
-plt.xlabel("Iterations")
-plt.ylabel("Cost")
-plt.show()
+    cost = neu_net.train(images, labels, training_iter)
 
-for i in range(len(new_weights)):
-    print(old_weights[i])
-    print(new_weights[i])
-    print("\n")
+    new_weights = neu_net.weights
+    new_bias = neu_net.bias
 
-print(cost[0],cost[-1])
+    plt.plot(list(range(training_iter)), cost)
+    plt.xlabel("Iterations")
+    plt.ylabel("Cost")
+    plt.show()
+
+    print(new_weights[-1], '\n')
+    print(old_weights[-1], '\n')
+
+
+    # print(cost[0]-cost[-1])
+    # must be issue in back_prop (maybe weights and biases arent updating correctly)
