@@ -25,7 +25,7 @@ class TestNet:
 
     def test_eval(self):
         l_nodes = np.random.randint(low=1, high=10, size=random.randint(5,10))
-        neu_net = NeuNet(l_nodes)
+        neu_net = NeuNet(list(l_nodes))
         
         data = np.random.uniform(size=l_nodes[0])
         a_l = neu_net.eval(data)
@@ -34,8 +34,8 @@ class TestNet:
             assert len(a_l[i]) == l_nodes[i]
 
     def test_train(self):
-        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5,10))
-        neu_net = NeuNet(l_nodes)
+        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
+        neu_net = NeuNet(list(l_nodes))
 
         amount_data = 50
         training_iter = 100
@@ -44,22 +44,9 @@ class TestNet:
         train_labels = [0] * amount_data
 
         for i in range(amount_data):
-            train_data[i] = np.random.uniform(size = (l_nodes[0], 1))
-            train_labels[i] = np.random.uniform(size = (l_nodes[-1], 1))
-
-        old_weights = neu_net.weights
-        old_bias = neu_net.bias
+            train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
+            train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
 
         cost_testing = neu_net.train(train_data, train_labels, training_iter)
 
-        new_weights = neu_net.weights
-        new_bias = neu_net.bias
-
         assert cost_testing[-1] <= cost_testing[0]
-        
-        # for i in range(len(new_bias)):
-
-        #     np.testing.assert_raises(AssertionError, np.testing.assert_array_equal, old_weights[i], new_weights[i])
-        #     np.testing.assert_raises(AssertionError, np.testing.assert_array_equal, old_bias[i], new_bias[i])
-
-            

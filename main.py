@@ -6,12 +6,12 @@ from svc.data import data
 
 if __name__ == '__main__':
 
-    l_nodes = [784, 15, 10]
+    l_nodes = [784, 5, 3, 10]
     neu_net = NeuNet(l_nodes)
     old_weights = neu_net.weights
     old_bias = neu_net.bias
 
-    training_iter = 1
+    training_iter = 1000
     data_amount = 1000
 
     images = data[0][0:data_amount]
@@ -30,6 +30,5 @@ if __name__ == '__main__':
     print(new_weights[-1], '\n')
     print(old_weights[-1], '\n')
 
+    print(cost[0]-cost[-1])
 
-    # print(cost[0]-cost[-1])
-    # must be issue in back_prop (maybe weights and biases arent updating correctly)
