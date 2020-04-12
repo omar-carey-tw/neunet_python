@@ -1,4 +1,5 @@
 from svc.net import *
+from svc.config import data_amount
 
 import matplotlib.pyplot as plt
 from svc.data import data
@@ -9,8 +10,7 @@ if __name__ == '__main__':
     l_nodes = [784, 5, 3, 10]
     neu_net = NeuNetBuilder(l_nodes, 'quadratic', "sigmoid").build()
 
-    training_iter = 100
-    data_amount = 100
+    training_iter = 1000
 
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]

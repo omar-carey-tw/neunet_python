@@ -1,9 +1,10 @@
 from mnist import MNIST
 import numpy as np
+from svc.config import data_amount
 
 PATH = "/Users/omarcarey/Desktop/aiproj/data/"
 mndata = MNIST(PATH)
-images, labels = mndata.load_training()
+images, labels = mndata.load_training_in_batches(data_amount)
 
 proc_labels = np.zeros(shape=(len(labels), 10, 1))
 proc_images = np.zeros(shape=(len(images), len(images[0]), 1))

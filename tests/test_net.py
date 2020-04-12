@@ -41,8 +41,6 @@ class TestNet:
             os.remove("mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data))
             os.remove("mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data))
 
-
-
         train_data = [0] * amount_data
         train_labels = [0] * amount_data
 
