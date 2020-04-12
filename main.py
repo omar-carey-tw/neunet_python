@@ -7,11 +7,11 @@ from svc.data import data
 if __name__ == '__main__':
 
     l_nodes = [784, 5, 3, 10]
-    neu_net = NeuNet(l_nodes)
+    neu_net = NeuNetBuilder(l_nodes, 'quadratic', "sigmoid").build()
     old_weights = neu_net.weights
     old_bias = neu_net.bias
 
-    training_iter = 1000
+    training_iter = 100
     data_amount = 1000
 
     images = data[0][0:data_amount]

@@ -3,7 +3,6 @@ from typing import *
 
 # todo: figure out what is taking so much cpu to make it efficient (compare to rust to see how fast)
 # todo: look into new cost functions
-# todo: builder pattern to implement cost functions
 # todo: look into pickling the neunet weights so you don't have to train every time
 
 
@@ -115,22 +114,50 @@ class NeuNet:
 
         return self.dcost(output_act, train_label) * self.dact(output_weighted)
 
-    def act(self, y):
-        # sigmoid
-        result = 1 / (1 + np.exp(-y))
-        return result
+    def set_act(self, func):
+        self.act = func
 
-    def dact(self, y):
-        # derivative of sigmoid
-        result = np.exp(-y) / (1 + np.exp(-y)) ** 2
-        return result
+    def set_dact(self, func):
+        self.dact = func
 
-    def cost(self, output_act: np.array, training_label) -> np.array:
-        # cost for parabolic 
-        result = 0.5 * (output_act - training_label) ** 2
-        return result
+    def set_cost(self, func):
+        self.cost = func
 
-    def dcost(self, output_act: np.array, training_label) -> np.array:
-        # derivative of parabolic cost
-        result = output_act - training_label
-        return result
+    def set_dcost(self, func):
+        self.dcost = func
+
+
+class NeuNetBuilder:
+
+    def __init__(self, l_nodes: List[int], cost_function: str, act_function: str) -> None:
+
+        self.l_nodes = l_nodes
+        self.cost_function = cost_function
+        self.act_function = act_function
+
+    def build(self) -> NeuNet:
+
+        def sigmoid(x):
+            return 1 / (1 + np.exp(-x))
+
+        def dsigmoid(x):
+            return np.exp(-x) / (1 + np.exp(-x)) ** 2
+
+        def quadratic(output_act, training_label):
+            return 0.5 * (output_act - training_label) ** 2
+
+        def dquadratic(output_act, training_label):
+            return output_act - training_label
+
+        neunet = NeuNet(self.l_nodes)
+
+        if self.act_function == "sigmoid":
+            neunet.set_act(sigmoid)
+            neunet.set_dact(dsigmoid)
+
+        if self.cost_function == "quadratic":
+            neunet.set_cost(quadratic)
+            neunet.set_dcost(dquadratic)
+
+        return neunet
+
