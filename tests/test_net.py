@@ -1,6 +1,5 @@
-import pytest
-import numpy as np
 import random
+import os
 
 from svc.net import *
 
@@ -36,6 +35,14 @@ class TestNet:
         amount_data = 50
         training_iter = 100
 
+        if "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data) in os.listdir()\
+                and "mnistcost_iter_" + str(training_iter) + "_data_" + str(len(amount_data)) in os.listdir():
+
+            os.remove("mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data))
+            os.remove("mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data))
+
+
+
         train_data = [0] * amount_data
         train_labels = [0] * amount_data
 
@@ -45,4 +52,15 @@ class TestNet:
 
         cost_testing = neu_net.train(train_data, train_labels, training_iter)
 
-        assert cost_testing[-1] <= cost_testing[0]
+        os.remove("mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data))
+        os.remove("mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data))
+
+        assert cost_testing[1][-1] <= cost_testing[1][0]
+
+    def test_builder(self):
+        l_nodes = [5, 3, 1]
+
+        neu_net = NeuNetBuilder(l_nodes, 'quadratic', "sigmoid").build()
+
+        assert neu_net.act(0) == 0.5
+

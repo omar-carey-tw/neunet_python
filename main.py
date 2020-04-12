@@ -8,27 +8,18 @@ if __name__ == '__main__':
 
     l_nodes = [784, 5, 3, 10]
     neu_net = NeuNetBuilder(l_nodes, 'quadratic', "sigmoid").build()
-    old_weights = neu_net.weights
-    old_bias = neu_net.bias
 
     training_iter = 100
-    data_amount = 1000
+    data_amount = 100
 
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]
 
     cost = neu_net.train(images, labels, training_iter)
 
-    new_weights = neu_net.weights
-    new_bias = neu_net.bias
-
-    plt.plot(list(range(training_iter)), cost)
+    plt.plot(list(range(training_iter)), cost[1])
     plt.xlabel("Iterations")
     plt.ylabel("Cost")
     plt.show()
 
-    print(new_weights[-1], '\n')
-    print(old_weights[-1], '\n')
-
-    print(cost[0]-cost[-1])
 

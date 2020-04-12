@@ -1,9 +1,10 @@
 import numpy as np
 from typing import *
+import dill as pickle
+import os
 
-# todo: figure out what is taking so much cpu to make it efficient (compare to rust to see how fast)
+# python3 -m cProfile -s tottime main.py
 # todo: look into new cost functions
-# todo: look into pickling the neunet weights so you don't have to train every time
 
 
 class NeuNet:
@@ -11,7 +12,6 @@ class NeuNet:
         Attributes:
         l_noes: list of int representing number of nodes per layer
         layers: number of layers including output and input
-        weights: list of arrays of weight matrices
     """
 
     def __init__(self, l_nodes: List[int]) -> None:
@@ -38,16 +38,11 @@ class NeuNet:
             Evaluates activation layers
         """
 
-        if len(inputs) != self.l_nodes[0]:
-            print("input size not compatible with network")
-            return []
-        else:
+        a_l = [0.0]*self.layers
+        a_l[0] = self.act(inputs)
 
-            a_l = [0.0]*self.layers
-            a_l[0] = self.act(inputs)
-
-            for i in range(1, self.layers):
-                a_l[i] = self.act(np.matmul(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])
+        for i in range(1, self.layers):
+            a_l[i] = self.act(np.matmul(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])
 
         return a_l
 
@@ -56,16 +51,11 @@ class NeuNet:
             Evaluates weighted sum layers
         """
 
-        if len(inputs) != self.l_nodes[0]:
-            print("input size not compatible with network")
-            return []
-        else:
+        z_l = [0]*self.layers
+        z_l[0] = inputs
 
-            z_l = [0]*self.layers
-            z_l[0] = inputs
-
-            for i in range(1, self.layers):
-                z_l[i] = np.matmul(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
+        for i in range(1, self.layers):
+            z_l[i] = np.matmul(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
 
         return z_l
 
@@ -76,23 +66,38 @@ class NeuNet:
                 is a list of lists where each list contains data
                 expect is an array of the expected data
         """
-        cost = np.zeros(shape=(training_iter, 1))
-        train_batch_size = len(train_data)
 
-        for index in range(training_iter):
-            cost_iter = 0
+        pickle_obj = "mnistobj_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
+        pickle_cost = "mnistcost_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
 
-            for i, data in enumerate(train_data):
-                a_l = self.eval(data)
-                z_l = self.eval_weighted(data)
+        if pickle_obj in os.listdir() and pickle_cost in os.listdir():
+            print("Loading previous training run...")
+            neunet = pickle.load(open(pickle_obj, 'rb'))
+            cost = pickle.load(open(pickle_cost, 'rb'))
 
-                cost_iter += np.sum(self.cost(a_l[-1], train_labels[i]))
+            return neunet, cost
 
-                self.back_prop(a_l, z_l, train_labels[i], learn_rate, train_batch_size)
+        else:
+            cost = np.zeros(shape=(training_iter, 1))
+            train_batch_size = len(train_data)
 
-            cost[index] = cost_iter / train_batch_size
+            for index in range(training_iter):
+                cost_iter = 0
 
-        return cost
+                for i, data in enumerate(train_data):
+                    a_l = self.eval(data)
+                    z_l = self.eval_weighted(data)
+
+                    cost_iter += np.sum(self.cost(a_l[-1], train_labels[i]))
+
+                    self.back_prop(a_l, z_l, train_labels[i], learn_rate, train_batch_size)
+
+                cost[index] = cost_iter / train_batch_size
+
+            pickle.dump(self, open(pickle_obj, 'wb'))
+            pickle.dump(cost, open(pickle_cost, 'wb'))
+
+            return self, cost
 
     def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
                   learning_rate: float, train_batch_size: int):
@@ -142,6 +147,7 @@ class NeuNetBuilder:
 
         def dsigmoid(x):
             return np.exp(-x) / (1 + np.exp(-x)) ** 2
+
 
         def quadratic(output_act, training_label):
             return 0.5 * (output_act - training_label) ** 2
