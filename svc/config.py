@@ -1,1 +1,1 @@
-data_amount = 1000
+data_amount = 100

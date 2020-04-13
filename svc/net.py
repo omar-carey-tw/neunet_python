@@ -5,6 +5,8 @@ import os
 
 # python3 -m cProfile -s tottime main.py
 # todo: look into new cost functions
+# todo: implement ReLu activation and see how it plays with layer error
+# todo: look into weight regularization  (no idea???)
 
 
 class NeuNet:
