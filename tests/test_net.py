@@ -18,15 +18,28 @@ class TestNet:
         for i in range(len(l_nodes)):
             assert neu_net.l_nodes[i] == l_nodes[i]
 
-    def test_eval(self):
+    def test_eval_sigmoid(self):
         l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
         neu_net = NeuNetBuilder(list(l_nodes), 'quadratic', "sigmoid").build()
         
-        data = np.random.uniform(size=l_nodes[0])
+        data = np.random.uniform(size=(l_nodes[0],1 ))
         a_l = neu_net.eval(data)
 
         for i in range(len(a_l)):
-            assert len(a_l[i]) == l_nodes[i]
+            assert a_l[i].shape[0] == l_nodes[i]
+            assert a_l[i].shape[1] == 1, f'l_nodes: {l_nodes} shape:{a_l[i].shape}'
+
+    def test_eval_relu(self):
+        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
+        neu_net = NeuNetBuilder(list(l_nodes), 'quadratic', "relu").build()
+
+        data = np.random.uniform(size=(l_nodes[0], 1))
+
+        a_l = neu_net.eval(data)
+
+        for i in range(len(a_l)):
+            assert a_l[i].shape[0] == l_nodes[i]
+            assert a_l[i].shape[1] == 1, f'l_nodes: {l_nodes} shape:{a_l[i].shape}'
 
     def test_train(self):
         l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
@@ -48,7 +61,7 @@ class TestNet:
             train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
             train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
 
-        cost_testing = neu_net.train(train_data, train_labels, training_iter)
+        cost_testing = neu_net.train(train_data, train_labels, training_iter, save=True)
 
         os.remove("mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data))
         os.remove("mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data))

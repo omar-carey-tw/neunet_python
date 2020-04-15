@@ -2,7 +2,6 @@ import numpy as np
 from typing import *
 import dill as pickle
 import os
-
 # python3 -m cProfile -s tottime main.py
 # todo: look into new cost functions
 # todo: implement ReLu activation and see how it plays with layer error
@@ -44,7 +43,7 @@ class NeuNet:
         a_l[0] = self.act(inputs)
 
         for i in range(1, self.layers):
-            a_l[i] = self.act(np.matmul(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])
+            a_l[i] = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])
 
         return a_l
 
@@ -57,12 +56,12 @@ class NeuNet:
         z_l[0] = inputs
 
         for i in range(1, self.layers):
-            z_l[i] = np.matmul(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
+            z_l[i] = np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
 
         return z_l
 
-    def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5) -> \
-            np.array:
+    def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5,
+              save=False) -> np.array:
         """ 
             Trains neural net by backpropagation using given data:
                 is a list of lists where each list contains data
@@ -96,8 +95,9 @@ class NeuNet:
 
                 cost[index] = cost_iter / train_batch_size
 
-            pickle.dump(self, open(pickle_obj, 'wb'))
-            pickle.dump(cost, open(pickle_cost, 'wb'))
+            if save:
+                pickle.dump(self, open(pickle_obj, 'wb'))
+                pickle.dump(cost, open(pickle_cost, 'wb'))
 
             return self, cost
 
@@ -150,8 +150,16 @@ class NeuNetBuilder:
         def dsigmoid(x):
             return np.exp(-x) / (1 + np.exp(-x)) ** 2
 
+        def relu(x):
+            return np.maximum(np.zeros(shape=(len(x), 1)), x)
+
+        # cost functions
+        def drelu(x):
+            return np.ones(shape=(len(x), 1))
 
         def quadratic(output_act, training_label):
+            # print(0.5 * (output_act - training_label) ** 2)
+            # print(">>>>>")
             return 0.5 * (output_act - training_label) ** 2
 
         def dquadratic(output_act, training_label):
@@ -162,7 +170,9 @@ class NeuNetBuilder:
         if self.act_function == "sigmoid":
             neunet.set_act(sigmoid)
             neunet.set_dact(dsigmoid)
-
+        elif self.act_function == "relu":
+            neunet.set_act(relu)
+            neunet.set_dact(drelu)
         if self.cost_function == "quadratic":
             neunet.set_cost(quadratic)
             neunet.set_dcost(dquadratic)
