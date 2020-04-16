@@ -1,1 +1,4 @@
-data_amount = 10
+# python3 -m cProfile -s tottime main.py
+
+
+data_amount = 5

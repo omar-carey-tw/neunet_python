@@ -3,9 +3,12 @@ from typing import *
 import dill as pickle
 import os
 # python3 -m cProfile -s tottime main.py
+
+# todo: look into He/Xavior Weight Initialization
+# todo: look into weight regularization to fix blow up issue (no idea???)
+
+# todo: refactor builder more and sepearte stuff out of build
 # todo: look into new cost functions
-# todo: implement ReLu activation and see how it plays with layer error
-# todo: look into weight regularization  (no idea???)
 
 
 class NeuNet:
@@ -136,11 +139,19 @@ class NeuNet:
 
 class NeuNetBuilder:
 
-    def __init__(self, l_nodes: List[int], cost_function: str, act_function: str) -> None:
+    def __init__(self, l_nodes: List[int]):
 
         self.l_nodes = l_nodes
-        self.cost_function = cost_function
+        self.act_function = ''
+        self.cost_function = ''
+
+    def act(self, act_function):
         self.act_function = act_function
+        return self
+
+    def cost(self, cost_function):
+        self.cost_function = cost_function
+        return self
 
     def build(self) -> NeuNet:
 
@@ -153,13 +164,11 @@ class NeuNetBuilder:
         def relu(x):
             return np.maximum(np.zeros(shape=(len(x), 1)), x)
 
-        # cost functions
         def drelu(x):
             return np.ones(shape=(len(x), 1))
 
+        # cost functions
         def quadratic(output_act, training_label):
-            # print(0.5 * (output_act - training_label) ** 2)
-            # print(">>>>>")
             return 0.5 * (output_act - training_label) ** 2
 
         def dquadratic(output_act, training_label):
