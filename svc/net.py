@@ -140,19 +140,9 @@ class NeuNetBuilder:
 
     def __init__(self, l_nodes: List[int]):
 
-        self.l_nodes = l_nodes
-        self.act_function = ''
-        self.cost_function = ''
+        self.net = NeuNet(l_nodes)
 
     def act(self, act_function):
-        self.act_function = act_function
-        return self
-
-    def cost(self, cost_function):
-        self.cost_function = cost_function
-        return self
-
-    def build(self) -> NeuNet:
 
         def sigmoid(x):
             return 1 / (1 + np.exp(-x))
@@ -166,24 +156,30 @@ class NeuNetBuilder:
         def drelu(x):
             return np.ones(shape=(len(x), 1))
 
-        # cost functions
+        if act_function == "sigmoid":
+            self.net.set_act(sigmoid)
+            self.net.set_dact(dsigmoid)
+        elif act_function == "relu":
+            self.net.set_act(relu)
+            self.net.set_dact(drelu)
+
+        return self
+
+    def cost(self, cost_function):
+
         def quadratic(output_act, training_label):
             return 0.5 * (output_act - training_label) ** 2
 
         def dquadratic(output_act, training_label):
             return output_act - training_label
 
-        neunet = NeuNet(self.l_nodes)
+        if cost_function == "quadratic":
+            self.net.set_cost(quadratic)
+            self.net.set_dcost(dquadratic)
 
-        if self.act_function == "sigmoid":
-            neunet.set_act(sigmoid)
-            neunet.set_dact(dsigmoid)
-        elif self.act_function == "relu":
-            neunet.set_act(relu)
-            neunet.set_dact(drelu)
-        if self.cost_function == "quadratic":
-            neunet.set_cost(quadratic)
-            neunet.set_dcost(dquadratic)
+        return self
 
-        return neunet
+    def build(self) -> NeuNet:
+
+        return self.net
 
