@@ -2,9 +2,7 @@ import numpy as np
 from typing import *
 import dill as pickle
 import os
-# python3 -m cProfile -s tottime main.py
 
-# todo: look into He/Xavior Weight Initialization
 # todo: look into weight regularization to fix blow up issue (no idea???)
 
 # todo: refactor builder more and sepearte stuff out of build
@@ -31,7 +29,8 @@ class NeuNet:
             _bias = []
 
             for i in range(1, self.layers):
-                _weights.append(np.random.uniform(size=(self.l_nodes[i], self.l_nodes[i - 1]), low=-1.0, high=1.0))
+                _weights.append(np.random.randn(self.l_nodes[i], self.l_nodes[i-1])
+                                * np.sqrt(2 / (self.l_nodes[i] + self.l_nodes[i-1])))
                 _bias.append(np.random.uniform(size=(self.l_nodes[i], 1), low=-1.0, high=1.0))
 
         self.weights = _weights

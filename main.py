@@ -9,15 +9,14 @@ if __name__ == '__main__':
 
     l_nodes = [784, 5, 3, 10]
 
-    neu_net = NeuNetBuilder(l_nodes).act("sigmoid").cost("quadratic").build()
+    neu_net = NeuNetBuilder(l_nodes).act("relu").cost("quadratic").build()
 
-    training_iter = 10
+    training_iter = 1000
 
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]
 
-    cost = neu_net.train(images, labels, training_iter)
-    print(cost[1])
+    cost = neu_net.train(images, labels, training_iter, learn_rate=0.01)
 
     plt.plot(list(range(training_iter)), cost[1])
     plt.xlabel("Iterations")
