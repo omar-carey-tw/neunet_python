@@ -1,5 +1,4 @@
 import random
-import os
 
 from svc.net import *
 
@@ -42,7 +41,7 @@ class TestNet:
             assert a_l[i].shape[0] == l_nodes[i]
             assert a_l[i].shape[1] == 1, f'l_nodes: {l_nodes} shape:{a_l[i].shape}'
 
-    def test_train(self):
+    def test_train_sigmoid(self):
         l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
         neu_net = NeuNetBuilder(list(l_nodes)).act("sigmoid").cost("quadratic").build()
 
@@ -62,8 +61,31 @@ class TestNet:
             train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
             train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
 
-        cost_testing = neu_net.train(train_data, train_labels, training_iter, save=False)
+        cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.1, save=False)
 
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
+    def test_train_relu(self):
+        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
+        neu_net = NeuNetBuilder(list(l_nodes)).act("relu").cost("quadratic").build()
+
+        amount_data = 50
+        training_iter = 100
+
+        if "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data) in os.listdir()\
+                and "mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data) in os.listdir():
+
+            os.remove("mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data))
+            os.remove("mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data))
+
+        train_data = [0] * amount_data
+        train_labels = [0] * amount_data
+
+        for i in range(amount_data):
+            train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
+            train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
+
+        cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.1, save=False)
+
+        assert cost_testing[1][-1] <= cost_testing[1][0]
 

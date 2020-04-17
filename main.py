@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     neu_net = NeuNetBuilder(l_nodes).act("relu").cost("quadratic").build()
 
-    training_iter = 1000
+    training_iter = 10
 
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]

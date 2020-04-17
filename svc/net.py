@@ -1,11 +1,11 @@
 import numpy as np
+import numpy.linalg as la
 from typing import *
 import dill as pickle
 import os
 
 # todo: look into weight regularization to fix blow up issue (no idea???)
-
-# todo: refactor builder more and sepearte stuff out of build
+    # look into why in i-2 in dcostw instead of i-1
 # todo: look into new cost functions
 
 
@@ -63,7 +63,7 @@ class NeuNet:
         return z_l
 
     def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5,
-              save=False) -> np.array:
+              reg_constant=0, save=False) -> np.array:
         """ 
             Trains neural net by backpropagation using given data:
                 is a list of lists where each list contains data
@@ -91,9 +91,9 @@ class NeuNet:
                     a_l = self.eval(data)
                     z_l = self.eval_weighted(data)
 
-                    cost_iter += np.sum(self.cost(a_l[-1], train_labels[i]))
+                    cost_iter += np.sum(self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant))
 
-                    self.back_prop(a_l, z_l, train_labels[i], learn_rate, train_batch_size)
+                    self.back_prop(a_l, z_l, train_labels[i], learn_rate, reg_constant)
 
                 cost[index] = cost_iter / train_batch_size
 
@@ -104,24 +104,27 @@ class NeuNet:
             return self, cost
 
     def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
-                  learning_rate: float, train_batch_size: int):
+                  learning_rate: float, reg_const: float):
 
         layer_error = self.output_error(act_layers[-1], weight_layers[-1], train_label)
-        weight_error = np.dot(layer_error, act_layers[-2].transpose())
+        weight_error = self.dcostw(layer_error, act_layers[-2], self.weights[-1], reg_const)
 
-        self.weights[-1] -= weight_error * (learning_rate / train_batch_size)
-        self.bias[-1] -= layer_error * (learning_rate / train_batch_size)
+        self.weights[-1] -= weight_error * learning_rate
+        self.bias[-1] -= layer_error * learning_rate
 
         for i in range(self.layers - 1, 1, -1):
-            layer_error = self.dact(weight_layers[i - 1]) * np.dot(self.weights[i - 1].transpose(), layer_error)
-            weight_error = np.dot(layer_error, act_layers[i - 2].transpose())
+            layer_error = self.dact(weight_layers[i - 1]) * np.dot(self.weights[i-1].transpose(), layer_error)
+            weight_error = self.dcostw(layer_error, act_layers[i - 2], self.weights[i-2], reg_const)
 
-            self.weights[i - 2] -= weight_error * (learning_rate / train_batch_size)
-            self.bias[i - 2] -= layer_error * (learning_rate / train_batch_size)
+            self.weights[i - 2] -= weight_error * learning_rate
+            self.bias[i - 2] -= layer_error * learning_rate
 
     def output_error(self, output_act: np.array, output_weighted: np.array, train_label: np.array) -> np.array:
-
         return self.dcost(output_act, train_label) * self.dact(output_weighted)
+
+    def dcostw(self, layer_error, act_layer, weight, reg_const):
+        result = np.dot(layer_error, act_layer.transpose()) + reg_const * weight
+        return result
 
     def set_act(self, func):
         self.act = func
@@ -167,8 +170,8 @@ class NeuNetBuilder:
 
     def cost(self, cost_function):
 
-        def quadratic(output_act, training_label):
-            return 0.5 * (output_act - training_label) ** 2
+        def quadratic(output_act, training_label, weight, reg_const):
+            return 0.5 * (output_act - training_label) ** 2 + reg_const/2 * la.norm(weight, 2) ** 2
 
         def dquadratic(output_act, training_label):
             return output_act - training_label
