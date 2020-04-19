@@ -4,9 +4,9 @@ from typing import *
 import dill as pickle
 import os
 
-# todo: look into new cost functions
 # todo: implement dropout in eval
-# todo: write test script to find best constant values
+# todo: look into new cost functions
+# todo: write test script to find best constant values for train
 
 
 class NeuNet:
@@ -33,7 +33,7 @@ class NeuNet:
 
                 _weights.append(np.random.randn(self.l_nodes[i], self.l_nodes[i-1])
                                 * he_regularization)
-                _bias.append(np.random.uniform(size=(self.l_nodes[i], 1), low=-1.0, high=1.0)
+                _bias.append(np.random.randn(self.l_nodes[i], 1)
                              * he_regularization)
 
         self.weights = _weights
