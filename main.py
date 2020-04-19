@@ -11,12 +11,12 @@ if __name__ == '__main__':
 
     neu_net = NeuNetBuilder(l_nodes).act("relu").cost("quadratic").build()
 
-    training_iter = 10
+    training_iter = 500
 
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]
 
-    cost = neu_net.train(images, labels, training_iter, learn_rate=0.01)
+    cost = neu_net.train(images, labels, training_iter, learn_rate=0.01, reg_constant=0.1)
 
     plt.plot(list(range(training_iter)), cost[1])
     plt.xlabel("Iterations")

@@ -4,9 +4,9 @@ from typing import *
 import dill as pickle
 import os
 
-# todo: look into weight regularization to fix blow up issue (no idea???)
-    # look into why in i-2 in dcostw instead of i-1
 # todo: look into new cost functions
+# todo: implement dropout in eval
+# todo: write test script to find best constant values
 
 
 class NeuNet:
@@ -29,9 +29,12 @@ class NeuNet:
             _bias = []
 
             for i in range(1, self.layers):
+                he_regularization = np.sqrt(2 / (self.l_nodes[i] + self.l_nodes[i-1]))
+
                 _weights.append(np.random.randn(self.l_nodes[i], self.l_nodes[i-1])
-                                * np.sqrt(2 / (self.l_nodes[i] + self.l_nodes[i-1])))
-                _bias.append(np.random.uniform(size=(self.l_nodes[i], 1), low=-1.0, high=1.0))
+                                * he_regularization)
+                _bias.append(np.random.uniform(size=(self.l_nodes[i], 1), low=-1.0, high=1.0)
+                             * he_regularization)
 
         self.weights = _weights
         self.bias = _bias
@@ -91,7 +94,7 @@ class NeuNet:
                     a_l = self.eval(data)
                     z_l = self.eval_weighted(data)
 
-                    cost_iter += np.sum(self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant))
+                    cost_iter += self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant)
 
                     self.back_prop(a_l, z_l, train_labels[i], learn_rate, reg_constant)
 
@@ -114,7 +117,7 @@ class NeuNet:
 
         for i in range(self.layers - 1, 1, -1):
             layer_error = self.dact(weight_layers[i - 1]) * np.dot(self.weights[i-1].transpose(), layer_error)
-            weight_error = self.dcostw(layer_error, act_layers[i - 2], self.weights[i-2], reg_const)
+            weight_error = self.dcostw(layer_error, act_layers[i-2], self.weights[i-2], reg_const)
 
             self.weights[i - 2] -= weight_error * learning_rate
             self.bias[i - 2] -= layer_error * learning_rate
@@ -171,7 +174,8 @@ class NeuNetBuilder:
     def cost(self, cost_function):
 
         def quadratic(output_act, training_label, weight, reg_const):
-            return 0.5 * (output_act - training_label) ** 2 + reg_const/2 * la.norm(weight, 2) ** 2
+            return sum(0.5 * (output_act - training_label) ** 2) + \
+                   reg_const/2 * la.norm(weight, 2) ** 2
 
         def dquadratic(output_act, training_label):
             return output_act - training_label
