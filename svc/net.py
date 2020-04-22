@@ -4,7 +4,8 @@ from typing import *
 import dill as pickle
 import os
 
-# todo: implement dropout in eval
+# todo: accuracy
+# todo: implement dropout in eval -> look into changing the l_nodes matrix
 # todo: look into new cost functions
 # todo: write test script to find best constant values for train
 
@@ -77,7 +78,7 @@ class NeuNet:
         pickle_cost = "mnistcost_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
 
         if pickle_obj in os.listdir() and pickle_cost in os.listdir():
-            print("Loading previous training run...")
+            print("Loading previous training run ...")
             neunet = pickle.load(open(pickle_obj, 'rb'))
             cost = pickle.load(open(pickle_cost, 'rb'))
 
@@ -96,7 +97,7 @@ class NeuNet:
 
                     cost_iter += self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant)
 
-                    self.back_prop(a_l, z_l, train_labels[i], learn_rate, reg_constant)
+                    self.back_prop(a_l, z_l, train_labels[i], learn_rate, reg_constant, train_batch_size)
 
                 cost[index] = cost_iter / train_batch_size
 
@@ -107,20 +108,21 @@ class NeuNet:
             return self, cost
 
     def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
-                  learning_rate: float, reg_const: float):
+                  learning_rate: float, reg_const: float, train_batch_size):
 
+        const = learning_rate / train_batch_size
         layer_error = self.output_error(act_layers[-1], weight_layers[-1], train_label)
         weight_error = self.dcostw(layer_error, act_layers[-2], self.weights[-1], reg_const)
 
-        self.weights[-1] -= weight_error * learning_rate
-        self.bias[-1] -= layer_error * learning_rate
+        self.weights[-1] -= weight_error * const
+        self.bias[-1] -= layer_error * const
 
         for i in range(self.layers - 1, 1, -1):
             layer_error = self.dact(weight_layers[i - 1]) * np.dot(self.weights[i-1].transpose(), layer_error)
             weight_error = self.dcostw(layer_error, act_layers[i-2], self.weights[i-2], reg_const)
 
-            self.weights[i - 2] -= weight_error * learning_rate
-            self.bias[i - 2] -= layer_error * learning_rate
+            self.weights[i - 2] -= weight_error * const
+            self.bias[i - 2] -= layer_error * const
 
     def output_error(self, output_act: np.array, output_weighted: np.array, train_label: np.array) -> np.array:
         return self.dcost(output_act, train_label) * self.dact(output_weighted)
