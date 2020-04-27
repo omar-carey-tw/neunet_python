@@ -4,9 +4,12 @@ from typing import *
 import dill as pickle
 import os
 
-# todo: implement dropout in eval -> look into changing the l_nodes matrix
+# todo: fix it being so slow now that dropout is a thing (or implement it into builder pattern)
+    # todo: np.choice is hella slow
 # todo: look into new cost functions
 # todo: write test script to find best constant values for train
+
+# I guess a rule of thumb is to use dropout over matrix reg for large networks (i guess)
 
 
 class NeuNet:
@@ -40,7 +43,7 @@ class NeuNet:
         self.bias = _bias
 
     def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5,
-              reg_constant=0, save=False) -> np.array:
+              reg_constant=0, save=False, probability=0.5) -> np.array:
         """
             Trains neural net by backpropagation using given data:
                 is a list of lists where each list contains data
@@ -49,13 +52,15 @@ class NeuNet:
 
         pickle_obj = "mnistobj_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
         pickle_cost = "mnistcost_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
+        pickle_acc = "mnistacc_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
 
         if pickle_obj in os.listdir() and pickle_cost in os.listdir():
             print("Loading previous training run ...")
             neunet = pickle.load(open(pickle_obj, 'rb'))
             cost = pickle.load(open(pickle_cost, 'rb'))
+            acc = pickle.load(open(pickle_acc, 'rb'))
 
-            return neunet, cost
+            return neunet, cost, acc
 
         else:
             cost = np.zeros(shape=(training_iter, 1))
@@ -67,8 +72,12 @@ class NeuNet:
                 acc_iter = 0
 
                 for i, data in enumerate(train_data):
-                    a_l = self.eval(data)
-                    z_l = self.eval_weighted(data)
+                    mask = []
+                    for j in self.l_nodes:
+                        mask.append(np.random.choice([1, 0], size=(j, 1), p=[probability, 1 - probability]).astype(np.bool))
+
+                    a_l = self.eval_dropout(data, mask)
+                    z_l = self.eval_weighted_dropout(data, mask)
 
                     acc_iter += self.accuracy(train_labels[i], a_l[-1])
                     cost_iter += self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant)
@@ -81,8 +90,60 @@ class NeuNet:
             if save:
                 pickle.dump(self, open(pickle_obj, 'wb'))
                 pickle.dump(cost, open(pickle_cost, 'wb'))
+                pickle.dump(acc, open(pickle_acc, 'wb'))
 
             return self, cost, acc
+
+    def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
+                  learning_rate: float, reg_const: float, train_batch_size):
+
+        const = learning_rate / train_batch_size
+        layer_error = self.output_error(act_layers[-1], weight_layers[-1], train_label)
+        weight_error = self.dcostw(layer_error, act_layers[-2], self.weights[-1], reg_const)
+
+        self.weights[-1] -= weight_error * const
+        self.bias[-1] -= layer_error * const
+
+        for i in range(self.layers - 1, 1, -1):
+            layer_error = self.dact(weight_layers[i - 1]) * np.dot(self.weights[i-1].transpose(), layer_error)
+            weight_error = self.dcostw(layer_error, act_layers[i-2], self.weights[i-2], reg_const)
+
+            self.weights[i - 2] -= weight_error * const
+            self.bias[i - 2] -= layer_error * const
+
+    def eval_dropout(self, inputs: np.array, mask) -> np.array:
+        """
+            Evaluates activation layers
+        """
+
+        a_l = [0.0]*self.layers
+        temp = self.act(inputs)
+        a_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
+        a_l[0][mask[0]] = temp[mask[0]]
+
+        for i in range(1, self.layers):
+            a_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
+            temp = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])
+            a_l[i][mask[i]] = temp[mask[i]]
+
+        return a_l
+
+    def eval_weighted_dropout(self, inputs: List[float], mask) -> np.array:
+        """
+            Evaluates weighted sum layers
+        """
+
+        z_l = [0]*self.layers
+        temp = inputs
+        z_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
+        z_l[0][mask[0]] = temp[mask[0]]
+
+        for i in range(1, self.layers):
+            z_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
+            temp = np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
+            z_l[i][mask[i]] = temp[mask[i]]
+
+        return z_l
 
     def eval(self, inputs: np.array) -> np.array:
         """
@@ -109,23 +170,6 @@ class NeuNet:
             z_l[i] = np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
 
         return z_l
-
-    def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
-                  learning_rate: float, reg_const: float, train_batch_size):
-
-        const = learning_rate / train_batch_size
-        layer_error = self.output_error(act_layers[-1], weight_layers[-1], train_label)
-        weight_error = self.dcostw(layer_error, act_layers[-2], self.weights[-1], reg_const)
-
-        self.weights[-1] -= weight_error * const
-        self.bias[-1] -= layer_error * const
-
-        for i in range(self.layers - 1, 1, -1):
-            layer_error = self.dact(weight_layers[i - 1]) * np.dot(self.weights[i-1].transpose(), layer_error)
-            weight_error = self.dcostw(layer_error, act_layers[i-2], self.weights[i-2], reg_const)
-
-            self.weights[i - 2] -= weight_error * const
-            self.bias[i - 2] -= layer_error * const
 
     def output_error(self, output_act: np.array, output_weighted: np.array, train_label: np.array) -> np.array:
         return self.dcost(output_act, train_label) * self.dact(output_weighted)
@@ -183,6 +227,8 @@ class NeuNetBuilder:
         elif act_function == "relu":
             self.net.set_act(relu)
             self.net.set_dact(drelu)
+        else:
+            raise NameError('Please enter valid activation name')
 
         return self
 
@@ -198,6 +244,8 @@ class NeuNetBuilder:
         if cost_function == "quadratic":
             self.net.set_cost(quadratic)
             self.net.set_dcost(dquadratic)
+        else:
+            raise NameError('Please enter valid cost name')
 
         return self
 

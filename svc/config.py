@@ -1,3 +1,3 @@
 # python3 -m cProfile -s tottime main.py
 
-data_amount = 500
+data_amount = 1000
