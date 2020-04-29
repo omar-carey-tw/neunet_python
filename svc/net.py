@@ -1,11 +1,13 @@
 import numpy as np
 import numpy.linalg as la
-from typing import *
 import dill as pickle
 import os
 
+from typing import *
+
 # todo: fix it being so slow now that dropout is a thing (or implement it into builder pattern)
-    # todo: np.choice is hella slow
+    # todo: np.choice is hella slow so is append
+    # todo: make it so mask only runs if you are using dropout and pickle the mask
 # todo: look into new cost functions
 # todo: write test script to find best constant values for train
 
@@ -45,23 +47,26 @@ class NeuNet:
     def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5,
               reg_constant=0, save=False, probability=1) -> np.array:
         """
-            Trains neural net by backpropagation using given data:
-                is a list of lists where each list contains data
-                expect is an array of the expected data
+            Trains neural net by backpropagation using given helpers:
+                is a list of lists where each list contains helpers
+                expect is an array of the expected helpers
+
+                set probability to 1 if dropout is not wanted
         """
-
-        if probability == 1:
-            self.set_eval(self.evaluate)
-            self.set_eval_weighted(self.evaluate_weighted)
-        else:
-            self.set_eval(self.eval_dropout)
-            self.set_eval_weighted(self.eval_weighted_dropout)
-
         path_to_obj = os.getcwd() + '/svc/train_objects/'
         path_to_obj.replace('tests/', '')
         pickle_obj = "mnistobj_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
         pickle_cost = "mnistcost_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
         pickle_acc = "mnistacc_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
+
+        if probability == 1:
+            self.set_eval(self.evaluate)
+            self.set_eval_weighted(self.evaluate_weighted)
+            mask = [0]*training_iter
+        else:
+            self.set_eval(self.eval_dropout)
+            self.set_eval_weighted(self.eval_weighted_dropout)
+            from helpers.dropout import mask
 
         if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
             print("Loading previous training run ...")
@@ -81,12 +86,9 @@ class NeuNet:
                 acc_iter = 0
 
                 for i, data in enumerate(train_data):
-                    mask = []
-                    for j in self.l_nodes:
-                        mask.append(np.random.choice([1, 0], size=(j, 1), p=[probability, 1 - probability]).astype(np.bool))
 
-                    a_l = self.eval(data, mask)
-                    z_l = self.eval_weighted(data, mask)
+                    a_l = self.eval(data, mask[index])
+                    z_l = self.eval_weighted(data, mask[index])
 
                     acc_iter += self.accuracy(train_labels[i], a_l[-1])
                     cost_iter += self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant)
@@ -128,7 +130,7 @@ class NeuNet:
         a_l = [0.0]*self.layers
         a_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
 
-        a_l[0][mask[0]] = self.act(inputs)[mask[0]]
+        a_l[0] = self.act(inputs)
 
         for i in range(1, self.layers):
             a_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
@@ -144,7 +146,7 @@ class NeuNet:
         z_l = [0]*self.layers
         z_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
 
-        z_l[0][mask[0]] = inputs[mask[0]]
+        z_l[0]= inputs
 
         for i in range(1, self.layers):
             z_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
@@ -187,7 +189,7 @@ class NeuNet:
 
     def accuracy(self, train_label, output: np.array):
         index = np.argmax(train_label)
-        delta = np.abs(output[index] - train_label[index])
+        delta = np.sum(np.abs(output[index] - train_label[index]))
 
         if delta < .1:
             return 1

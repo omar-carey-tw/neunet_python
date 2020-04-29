@@ -7,7 +7,7 @@ import os
 
 
 data_file = 'data_amount_' + str(data_amount)
-path_to_data = 'data/data_files/'
+path_to_data = 'helpers/data_files/'
 
 if data_file not in os.listdir(path_to_data):
 
