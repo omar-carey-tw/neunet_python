@@ -9,7 +9,7 @@ import os
 # todo: look into new cost functions
 # todo: write test script to find best constant values for train
 
-# I guess a rule of thumb is to use dropout over matrix reg for large networks (i guess)
+# I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
 
 
 class NeuNet:
@@ -43,22 +43,31 @@ class NeuNet:
         self.bias = _bias
 
     def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5,
-              reg_constant=0, save=False, probability=0.5) -> np.array:
+              reg_constant=0, save=False, probability=1) -> np.array:
         """
             Trains neural net by backpropagation using given data:
                 is a list of lists where each list contains data
                 expect is an array of the expected data
         """
 
+        if probability == 1:
+            self.set_eval(self.evaluate)
+            self.set_eval_weighted(self.evaluate_weighted)
+        else:
+            self.set_eval(self.eval_dropout)
+            self.set_eval_weighted(self.eval_weighted_dropout)
+
+        path_to_obj = os.getcwd() + '/svc/train_objects/'
+        path_to_obj.replace('tests/', '')
         pickle_obj = "mnistobj_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
         pickle_cost = "mnistcost_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
         pickle_acc = "mnistacc_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
 
-        if pickle_obj in os.listdir() and pickle_cost in os.listdir():
+        if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
             print("Loading previous training run ...")
-            neunet = pickle.load(open(pickle_obj, 'rb'))
-            cost = pickle.load(open(pickle_cost, 'rb'))
-            acc = pickle.load(open(pickle_acc, 'rb'))
+            neunet = pickle.load(open(path_to_obj + pickle_obj, 'rb'))
+            cost = pickle.load(open(path_to_obj + pickle_cost, 'rb'))
+            acc = pickle.load(open(path_to_obj + pickle_acc, 'rb'))
 
             return neunet, cost, acc
 
@@ -76,8 +85,8 @@ class NeuNet:
                     for j in self.l_nodes:
                         mask.append(np.random.choice([1, 0], size=(j, 1), p=[probability, 1 - probability]).astype(np.bool))
 
-                    a_l = self.eval_dropout(data, mask)
-                    z_l = self.eval_weighted_dropout(data, mask)
+                    a_l = self.eval(data, mask)
+                    z_l = self.eval_weighted(data, mask)
 
                     acc_iter += self.accuracy(train_labels[i], a_l[-1])
                     cost_iter += self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant)
@@ -88,9 +97,9 @@ class NeuNet:
                 acc[index] = acc_iter / train_batch_size
 
             if save:
-                pickle.dump(self, open(pickle_obj, 'wb'))
-                pickle.dump(cost, open(pickle_cost, 'wb'))
-                pickle.dump(acc, open(pickle_acc, 'wb'))
+                pickle.dump(self, open(path_to_obj + pickle_obj, 'wb'))
+                pickle.dump(cost, open(path_to_obj + pickle_cost, 'wb'))
+                pickle.dump(acc, open(path_to_obj + pickle_acc, 'wb'))
 
             return self, cost, acc
 
@@ -113,39 +122,37 @@ class NeuNet:
 
     def eval_dropout(self, inputs: np.array, mask) -> np.array:
         """
-            Evaluates activation layers
+            Evaluates activation layers with dropout
         """
 
         a_l = [0.0]*self.layers
-        temp = self.act(inputs)
         a_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
-        a_l[0][mask[0]] = temp[mask[0]]
+
+        a_l[0][mask[0]] = self.act(inputs)[mask[0]]
 
         for i in range(1, self.layers):
             a_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
-            temp = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])
-            a_l[i][mask[i]] = temp[mask[i]]
+            a_l[i][mask[i]] = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])[mask[i]]
 
         return a_l
 
     def eval_weighted_dropout(self, inputs: List[float], mask) -> np.array:
         """
-            Evaluates weighted sum layers
+            Evaluates weighted sum layers with dropout
         """
 
         z_l = [0]*self.layers
-        temp = inputs
         z_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
-        z_l[0][mask[0]] = temp[mask[0]]
+
+        z_l[0][mask[0]] = inputs[mask[0]]
 
         for i in range(1, self.layers):
             z_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
-            temp = np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
-            z_l[i][mask[i]] = temp[mask[i]]
+            z_l[i][mask[i]] = inputs[mask[i]]
 
         return z_l
 
-    def eval(self, inputs: np.array) -> np.array:
+    def evaluate(self, inputs: np.array, mask=[]) -> np.array:
         """
             Evaluates activation layers
         """
@@ -158,7 +165,7 @@ class NeuNet:
 
         return a_l
 
-    def eval_weighted(self, inputs: List[float]) -> np.array:
+    def evaluate_weighted(self, inputs: List[float], mask=[]) -> np.array:
         """
             Evaluates weighted sum layers
         """
@@ -187,6 +194,12 @@ class NeuNet:
         else:
             return 0
 
+    # Setters
+    def set_eval(self, func):
+        self.eval = func
+
+    def set_eval_weighted(self, func):
+        self.eval_weighted = func
 
     def set_act(self, func):
         self.act = func

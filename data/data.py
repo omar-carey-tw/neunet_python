@@ -7,9 +7,9 @@ import os
 
 
 data_file = 'data_amount_' + str(data_amount)
-path_to_data = ''
+path_to_data = 'data/data_files/'
 
-if data_file not in os.listdir():
+if data_file not in os.listdir(path_to_data):
 
     PATH = "/Users/omarcarey/Desktop/aiproj/data/"
     mndata = MNIST(PATH)
@@ -26,8 +26,8 @@ if data_file not in os.listdir():
         proc_images[index] = np.array(images[index]).reshape(len(images[index]), 1) / gray_scale
 
     data = (proc_images, proc_labels)
-    pickle.dump(data, open(data_file, 'wb'))
+    pickle.dump(data, open(path_to_data + data_file, 'wb'))
 
 else:
 
-    data = pickle.load(open(data_file, 'rb'))
+    data = pickle.load(open(path_to_data + data_file, 'rb'))

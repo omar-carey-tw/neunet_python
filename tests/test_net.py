@@ -23,7 +23,7 @@ class TestNet:
         neu_net = NeuNetBuilder(list(l_nodes)).act("sigmoid").cost("quadratic").build()
 
         data = np.random.uniform(size=(l_nodes[0], 1))
-        a_l = neu_net.eval(data)
+        a_l = neu_net.evaluate(data)
 
         for i in range(len(a_l)):
             assert a_l[i].shape[0] == l_nodes[i]
@@ -35,7 +35,7 @@ class TestNet:
 
         data = np.random.uniform(size=(l_nodes[0], 1))
 
-        a_l = neu_net.eval(data)
+        a_l = neu_net.evaluate(data)
 
         for i in range(len(a_l)):
             assert a_l[i].shape[0] == l_nodes[i]
@@ -48,13 +48,17 @@ class TestNet:
         amount_data = 50
         training_iter = 100
 
+        path = os.getcwd() + '/svc/train_objects/'
+        path.replace('tests/', '')
         mnistobj = "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data)
         mnistcost = "mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data)
+        mnistacc = "mnistacc_iter_" + str(training_iter) + "_data_" + str(amount_data)
 
-        if mnistobj in os.listdir() and mnistcost in os.listdir():
+        if mnistobj and mnistcost and mnistacc in os.listdir(path):
 
-            os.remove(mnistcost)
-            os.remove(mnistobj)
+            os.remove(path + mnistacc)
+            os.remove(path + mnistcost)
+            os.remove(path + mnistobj)
 
         train_data = [0] * amount_data
         train_labels = [0] * amount_data
@@ -65,8 +69,9 @@ class TestNet:
 
         cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.1, save=True)
 
-        os.remove(mnistcost)
-        os.remove(mnistobj)
+        os.remove(path + mnistacc)
+        os.remove(path + mnistcost)
+        os.remove(path + mnistobj)
 
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
@@ -77,13 +82,17 @@ class TestNet:
         amount_data = 50
         training_iter = 100
 
+        path = os.getcwd() + '/svc/train_objects/'
+        path.replace('tests/', '')
         mnistobj = "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data)
         mnistcost = "mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data)
+        mnistacc = "mnistacc_iter_" + str(training_iter) + "_data_" + str(amount_data)
 
-        if mnistobj in os.listdir() and mnistcost in os.listdir():
+        if mnistobj and mnistcost and mnistacc in os.listdir(path):
 
-            os.remove(mnistcost)
-            os.remove(mnistobj)
+            os.remove(path + mnistacc)
+            os.remove(path + mnistcost)
+            os.remove(path + mnistobj)
 
         train_data = [0] * amount_data
         train_labels = [0] * amount_data
@@ -95,8 +104,9 @@ class TestNet:
         cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.01, save=True,
                                      reg_constant=0.5)
 
-        os.remove(mnistcost)
-        os.remove(mnistobj)
+        os.remove(path + mnistacc)
+        os.remove(path + mnistcost)
+        os.remove(path + mnistobj)
 
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
