@@ -7,12 +7,19 @@ from helpers.data import data
 
 if __name__ == '__main__':
 
-    neu_net = NeuNetBuilder(l_nodes).act("relu").cost("quadratic").build()
+    neu_net = NeuNetBuilder(l_nodes).act("relu").cost("cubic").build()
 
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]
 
-    cost = neu_net.train(images, labels, training_iter, learn_rate=0.1, save=False, reg_constant=0.1, probability=probability)
+    cost = neu_net.train(images,
+                         labels,
+                         training_iter,
+                         learn_rate=0.15,
+                         reg_constant=0.001,
+                         probability=probability,
+                         save=False
+                         )
 
     plt.plot(list(range(training_iter)), cost[1])
     plt.xlabel("Iterations")
