@@ -49,8 +49,8 @@ if __name__ == '__main__':
         cost = neu_net.train(images,
                              labels,
                              training_iter,
-                             learn_rate=0.15,
-                             reg_constant=0.001,
+                             learn_rate=0.5,
+                             reg_constant=0.01,
                              probability=probability,
                              save=False
                              )

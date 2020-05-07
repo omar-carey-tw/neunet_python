@@ -5,6 +5,7 @@ import os
 
 from typing import *
 
+# todo: figure out cost function issue ( I don't think cubic is valid -> it is not always non negativs)
 # todo: write test script to find best constant values for train
 
 # I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
