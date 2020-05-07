@@ -30,12 +30,11 @@ class NeuNet:
             _bias = []
 
             for i in range(1, self.layers):
-                he_regularization = np.sqrt(2 / (self.l_nodes[i] * self.l_nodes[i-1]))
+                he_regularization = np.sqrt(1 / self.l_nodes[i-1])
 
                 _weights.append(np.random.randn(self.l_nodes[i], self.l_nodes[i-1])
                                 * he_regularization)
-                _bias.append(np.random.randn(self.l_nodes[i], 1)
-                             * he_regularization)
+                _bias.append(np.random.randn(self.l_nodes[i], 1))
 
         self.weights = _weights
         self.bias = _bias

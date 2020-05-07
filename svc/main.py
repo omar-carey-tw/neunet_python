@@ -7,7 +7,7 @@ from helpers.data import data
 
 if __name__ == '__main__':
 
-    epoch = 30
+    epoch = None
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]
 
@@ -22,7 +22,7 @@ if __name__ == '__main__':
             cost = neu_net.train(images,
                                  labels,
                                  training_iter,
-                                 learn_rate=0.15,
+                                 learn_rate=0.0005,
                                  reg_constant=0.001,
                                  probability=probability,
                                  save=False
