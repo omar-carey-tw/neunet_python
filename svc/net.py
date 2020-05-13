@@ -5,7 +5,8 @@ import os
 
 from typing import *
 
-# todo: figure out cost function issue ( I don't think cubic is valid -> it is not always non negativs)
+# todo: Gaussian dropout rate instead of bernoulli
+    # look into refactorting dropout workflow (multiply by mask array instead of index)
 # todo: write test script to find best constant values for train
 
 # I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
@@ -254,11 +255,18 @@ class NeuNetBuilder:
             return output_act - training_label
 
         def cubic(output_act, training_label, weight, reg_const):
-            return sum(1/3*output_act**3 - 0.5*training_label*output_act) + \
+            return sum(1/3*output_act**3 - 0.5*training_label*output_act**2) + \
                    reg_const / 2 * la.norm(weight, 2) ** 2
 
         def dcubic(output_act, training_label):
             return output_act**2 - training_label*output_act
+
+        def expquadratic(output_act, training_label, weight, reg_const):
+            return sum(1/2 * np.exp((output_act - training_label)**2) + \
+                   reg_const/2 * la.norm(weight, 2) ** 2)
+
+        def dexpquadratic(output_act, training_label):
+            return (output_act - training_label) * np.exp((output_act - training_label)**2)
 
         if cost_function == "quadratic":
             self.net.set_cost(quadratic)
@@ -266,6 +274,9 @@ class NeuNetBuilder:
         elif cost_function == "cubic":
             self.net.set_cost(cubic)
             self.net.set_dcost(dcubic)
+        elif cost_function == "expquadratic":
+            self.net.set_cost(expquadratic)
+            self.net.set_dcost(dexpquadratic)
         else:
             raise NameError('Please enter valid cost name')
 

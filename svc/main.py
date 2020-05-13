@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     else:
 
-        neu_net = NeuNetBuilder(l_nodes).act("relu").cost("cubic").build()
+        neu_net = NeuNetBuilder(l_nodes).act("relu").cost("expquadratic").build()
 
         cost = neu_net.train(images,
                              labels,
