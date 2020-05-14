@@ -50,8 +50,7 @@ class NeuNet:
 
                 set probability to 1 if dropout is not wanted
         """
-        path_to_obj = os.getcwd() + '/svc/train_objects/'
-        path_to_obj.replace('tests/', '')
+        path_to_obj = (os.getcwd() + '/svc/train_objects/').replace('tests/', '')
         pickle_obj = "mnistobj_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
         pickle_cost = "mnistcost_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
         pickle_acc = "mnistacc_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
@@ -104,7 +103,7 @@ class NeuNet:
                 pickle.dump(cost, open(path_to_obj + pickle_cost, 'wb'))
                 pickle.dump(acc, open(path_to_obj + pickle_acc, 'wb'))
 
-            self.weights *= mask.get('prob')
+            # self.weights *= mask.get('prob')
             return self, cost, acc
 
     def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,

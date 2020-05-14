@@ -1,4 +1,5 @@
 import random
+from flaky import flaky
 
 from svc.net import *
 
@@ -42,139 +43,77 @@ class TestNet:
             assert a_l[i].shape[1] == 1, f'l_nodes: {l_nodes} shape:{a_l[i].shape}'
 
     def test_train_sigmoid(self):
-        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
-        neu_net = NeuNetBuilder(list(l_nodes)).act("sigmoid").cost("quadratic").build()
+        from svc.test_config import test_data_amount, test_training_iter, test_l_nodes
+        neu_net = NeuNetBuilder(list(test_l_nodes)).act("sigmoid").cost("quadratic").build()
 
-        amount_data = 50
-        training_iter = 100
+        train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
+        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.1, save=True)
 
-        path = os.getcwd() + '/svc/train_objects/'
-        path.replace('tests/', '')
-        mnistobj = "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistcost = "mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistacc = "mnistacc_iter_" + str(training_iter) + "_data_" + str(amount_data)
-
-        if mnistobj and mnistcost and mnistacc in os.listdir(path):
-
-            os.remove(path + mnistacc)
-            os.remove(path + mnistcost)
-            os.remove(path + mnistobj)
-
-        train_data = [0] * amount_data
-        train_labels = [0] * amount_data
-
-        for i in range(amount_data):
-            train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
-            train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
-
-        cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.1, save=True)
-
-        os.remove(path + mnistacc)
-        os.remove(path + mnistcost)
-        os.remove(path + mnistobj)
-
+        self.cleanup_files(test_data_amount, test_training_iter)
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
     def test_train_relu(self):
-        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
-        neu_net = NeuNetBuilder(list(l_nodes)).act("relu").cost("quadratic").build()
+        from svc.test_config import test_data_amount, test_training_iter, test_l_nodes
+        neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("quadratic").build()
 
-        amount_data = 50
-        training_iter = 100
-
-        path = os.getcwd() + '/svc/train_objects/'
-        path.replace('tests/', '')
-        mnistobj = "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistcost = "mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistacc = "mnistacc_iter_" + str(training_iter) + "_data_" + str(amount_data)
-
-        if mnistobj and mnistcost and mnistacc in os.listdir(path):
-
-            os.remove(path + mnistacc)
-            os.remove(path + mnistcost)
-            os.remove(path + mnistobj)
-
-        train_data = [0] * amount_data
-        train_labels = [0] * amount_data
-
-        for i in range(amount_data):
-            train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
-            train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
-
-        cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.01, save=True,
+        train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
+        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, save=True,
                                      reg_constant=0.5)
 
-        os.remove(path + mnistacc)
-        os.remove(path + mnistcost)
-        os.remove(path + mnistobj)
-
+        self.cleanup_files(test_data_amount, test_training_iter)
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
     def test_train_relu_cubic(self):
-        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
-        neu_net = NeuNetBuilder(list(l_nodes)).act("relu").cost("cubic").build()
+        from svc.test_config import test_data_amount, test_training_iter, test_l_nodes
+        neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("cubic").build()
 
-        amount_data = 50
-        training_iter = 100
-
-        path = os.getcwd() + '/svc/train_objects/'
-        path.replace('tests/', '')
-        mnistobj = "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistcost = "mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistacc = "mnistacc_iter_" + str(training_iter) + "_data_" + str(amount_data)
-
-        if mnistobj and mnistcost and mnistacc in os.listdir(path):
-
-            os.remove(path + mnistacc)
-            os.remove(path + mnistcost)
-            os.remove(path + mnistobj)
-
-        train_data = [0] * amount_data
-        train_labels = [0] * amount_data
-
-        for i in range(amount_data):
-            train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
-            train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
-
-        cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.01, save=True,
+        train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
+        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, save=True,
                                      reg_constant=0.5)
 
-        os.remove(path + mnistacc)
-        os.remove(path + mnistcost)
-        os.remove(path + mnistobj)
-
+        self.cleanup_files(test_data_amount, test_training_iter)
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
     def test_train_relu_expquadratic(self):
-        l_nodes = np.random.randint(low=1, high=10, size=random.randint(5, 10))
-        neu_net = NeuNetBuilder(list(l_nodes)).act("relu").cost("expquadratic").build()
+        from svc.test_config import test_data_amount, test_training_iter, test_l_nodes
+        neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("expquadratic").build()
 
-        amount_data = 50
-        training_iter = 100
-
-        path = os.getcwd() + '/svc/train_objects/'
-        path.replace('tests/', '')
-        mnistobj = "mnistobj_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistcost = "mnistcost_iter_" + str(training_iter) + "_data_" + str(amount_data)
-        mnistacc = "mnistacc_iter_" + str(training_iter) + "_data_" + str(amount_data)
-
-        if mnistobj and mnistcost and mnistacc in os.listdir(path):
-            os.remove(path + mnistacc)
-            os.remove(path + mnistcost)
-            os.remove(path + mnistobj)
-
-        train_data = [0] * amount_data
-        train_labels = [0] * amount_data
-
-        for i in range(amount_data):
-            train_data[i] = np.random.uniform(size=(l_nodes[0], 1))
-            train_labels[i] = np.random.uniform(size=(l_nodes[-1], 1))
-
-        cost_testing = neu_net.train(train_data, train_labels, training_iter, learn_rate=0.01, save=True,
+        train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
+        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, save=True,
                                      reg_constant=0.5)
+
+        self.cleanup_files(test_data_amount, test_training_iter)
+        assert cost_testing[1][-1] <= cost_testing[1][0]
+
+    @flaky(max_runs=5)
+    def test_train_relu_expquadratic_dropout(self):
+        from svc.test_config import test_data_amount, test_training_iter, test_l_nodes, test_probability
+        neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("expquadratic").build()
+
+        train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
+        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, probability=test_probability,
+                                     save=True)
+
+        self.cleanup_files(test_data_amount, test_training_iter)
+        assert cost_testing[1][-1] <= cost_testing[1][0]
+
+    def cleanup_files(self, test_data_amount, test_training_iter):
+
+        path = (os.getcwd() + '/svc/train_objects/').replace('tests/', '')
+        mnistobj = "mnistobj_iter_" + str(test_training_iter) + "_data_" + str(test_data_amount)
+        mnistcost = "mnistcost_iter_" + str(test_training_iter) + "_data_" + str(test_data_amount)
+        mnistacc = "mnistacc_iter_" + str(test_training_iter) + "_data_" + str(test_data_amount)
 
         os.remove(path + mnistacc)
         os.remove(path + mnistcost)
         os.remove(path + mnistobj)
 
-        assert cost_testing[1][-1] <= cost_testing[1][0]
+    def get_test_data(self, test_data_amount, test_l_nodes):
+        train_data = [0] * test_data_amount
+        train_labels = [0] * test_data_amount
+
+        for i in range(test_data_amount):
+            train_data[i] = np.random.uniform(size=(test_l_nodes[0], 1))
+            train_labels[i] = np.random.uniform(size=(test_l_nodes[-1], 1))
+
+        return train_data, train_labels

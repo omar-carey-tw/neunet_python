@@ -1,7 +1,7 @@
 # python3 -m cProfile -s tottime svc/main.py
 
-data_amount = 750
+data_amount = 500
 training_iter = 500
-probability = 1
-l_nodes = [784, 20, 10]
+probability = 0.5
+l_nodes = [784, 10]
 
