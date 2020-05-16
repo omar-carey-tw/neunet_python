@@ -3,7 +3,7 @@ import pytest
 
 from svc.net import *
 
-
+# TEST_FLAG=true pytest tests
 class TestNet:
 
     def test_neunet_instance(self):
@@ -43,7 +43,7 @@ class TestNet:
             assert a_l[i].shape[1] == 1, f'l_nodes: {l_nodes} shape:{a_l[i].shape}'
 
     def test_train_sigmoid(self):
-        from tests.test_config import test_data_amount, test_training_iter, test_l_nodes
+        from tests.config_test import test_data_amount, test_training_iter, test_l_nodes
         neu_net = NeuNetBuilder(list(test_l_nodes)).act("sigmoid").cost("quadratic").build()
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
@@ -53,7 +53,7 @@ class TestNet:
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
     def test_train_relu(self):
-        from tests.test_config import test_data_amount, test_training_iter, test_l_nodes
+        from tests.config_test import test_data_amount, test_training_iter, test_l_nodes
         neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("quadratic").build()
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
@@ -64,7 +64,7 @@ class TestNet:
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
     def test_train_relu_cubic(self):
-        from tests.test_config import test_data_amount, test_training_iter, test_l_nodes
+        from tests.config_test import test_data_amount, test_training_iter, test_l_nodes
         neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("cubic").build()
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
@@ -74,9 +74,9 @@ class TestNet:
         self.cleanup_files(test_data_amount, test_training_iter)
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
-    @pytest.mark.flaky(max_runs=5)
+    @pytest.mark.flaky(max_runs=10)
     def test_train_relu_expquadratic(self):
-        from tests.test_config import test_data_amount, test_training_iter, test_l_nodes
+        from tests.config_test import test_data_amount, test_training_iter, test_l_nodes
         neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("expquadratic").build()
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
@@ -86,14 +86,13 @@ class TestNet:
         self.cleanup_files(test_data_amount, test_training_iter)
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
-    @pytest.mark.flaky(max_runs=5)
+    @pytest.mark.flaky(max_runs=10)
     def test_train_relu_expquadratic_dropout(self):
-        from tests.test_config import test_data_amount, test_training_iter, test_l_nodes, test_probability
+        from tests.config_test import test_data_amount, test_training_iter, test_l_nodes
         neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("expquadratic").build()
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
-        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, probability=test_probability,
-                                     save=True)
+        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, save=True)
 
         self.cleanup_files(test_data_amount, test_training_iter)
         assert cost_testing[1][-1] <= cost_testing[1][0]

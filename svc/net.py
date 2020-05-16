@@ -5,7 +5,6 @@ import os
 
 from typing import *
 
-# todo: refactor dropout workflow -> mult by dropout not index them
 # todo: Gaussian dropout rate instead of bernoulli
     # look into refactorting dropout workflow (multiply by mask array instead of index)
 # todo: write test script to find best constant values for train
@@ -26,8 +25,7 @@ class NeuNet:
         self.layers = len(l_nodes)
 
         if self.layers < 2:
-            print("please create neural net with more than 2 layers!")
-            return
+            raise NameError('Please create network of atleast 2 layers')
         else:
             _weights = []
             _bias = []
@@ -37,13 +35,13 @@ class NeuNet:
 
                 _weights.append(np.random.randn(self.l_nodes[i], self.l_nodes[i-1])
                                 * he_regularization)
-                _bias.append(np.random.randn(self.l_nodes[i], 1))
+                _bias.append(np.zeros(shape=(self.l_nodes[i], 1)))
 
         self.weights = _weights
         self.bias = _bias
 
     def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5,
-              reg_constant=0, save=False, probability=1) -> np.array:
+              reg_constant=0, save=False) -> np.array:
         """
             Trains neural net by backpropagation using given helpers:
                 is a list of lists where each list contains helpers
@@ -66,14 +64,26 @@ class NeuNet:
 
         else:
 
-            if probability == 1:
-                self.set_eval(self.evaluate)
-                self.set_eval_weighted(self.evaluate_weighted)
-                mask = [[[0]*self.layers]*len(train_data)]*training_iter
+            if os.environ.get('TEST_FLAG'):
+                from tests.config_test import test_probability
+                if test_probability is not None:
+                    self.set_eval(self.evaluate)
+                    self.set_eval_weighted(self.evaluate_weighted)
+                    mask = [[[1]*self.layers]*len(train_data)]*training_iter
+                else:
+                    self.set_eval(self.eval_dropout)
+                    self.set_eval_weighted(self.eval_weighted_dropout)
+                    from tests.dropout_test import mask
             else:
-                self.set_eval(self.eval_dropout)
-                self.set_eval_weighted(self.eval_weighted_dropout)
-                from helpers.dropout import mask
+                from svc.config import probability
+                if probability == 1:
+                    self.set_eval(self.evaluate)
+                    self.set_eval_weighted(self.evaluate_weighted)
+                    mask = [[[1]*self.layers]*len(train_data)]*training_iter
+                else:
+                    self.set_eval(self.eval_dropout)
+                    self.set_eval_weighted(self.eval_weighted_dropout)
+                    from helpers.dropout import mask
 
             cost = np.zeros(shape=(training_iter, 1))
             acc = np.zeros(shape=(training_iter, 1))
@@ -101,7 +111,6 @@ class NeuNet:
                 pickle.dump(cost, open(path_to_obj + pickle_cost, 'wb'))
                 pickle.dump(acc, open(path_to_obj + pickle_acc, 'wb'))
 
-            # self.weights *= mask.get('prob')
             return self, cost, acc
 
     def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,

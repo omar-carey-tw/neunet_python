@@ -8,12 +8,12 @@ from helpers.data import data
 if __name__ == '__main__':
 
     epoch = None
-    reg_const = 0.01
-    learn_rate = 0.5
     images = data[0][0:data_amount]
     labels = data[1][0:data_amount]
 
     if epoch is not None:
+
+        learn_rate = 0.5
 
         neu_net = NeuNetBuilder(l_nodes).act("relu").cost("expquadratic").build()
 
@@ -24,9 +24,7 @@ if __name__ == '__main__':
             cost = neu_net.train(images,
                                  labels,
                                  training_iter,
-                                 learn_rate=0.0005,
-                                 reg_constant=0.001,
-                                 probability=probability,
+                                 learn_rate=0.5,
                                  save=False
                                  )
 
@@ -46,14 +44,14 @@ if __name__ == '__main__':
 
     else:
 
+        learn_rate = 0.5
+
         neu_net = NeuNetBuilder(l_nodes).act("relu").cost("expquadratic").build()
 
         cost = neu_net.train(images,
                              labels,
                              training_iter,
                              learn_rate=learn_rate,
-                             reg_constant=reg_const,
-                             probability=probability,
                              save=False
                              )
 
