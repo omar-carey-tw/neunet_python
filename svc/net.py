@@ -5,6 +5,7 @@ import os
 
 from typing import *
 
+# todo: refactor dropout workflow -> mult by dropout not index them
 # todo: Gaussian dropout rate instead of bernoulli
     # look into refactorting dropout workflow (multiply by mask array instead of index)
 # todo: write test script to find best constant values for train
@@ -68,10 +69,7 @@ class NeuNet:
             if probability == 1:
                 self.set_eval(self.evaluate)
                 self.set_eval_weighted(self.evaluate_weighted)
-                mask = {
-                    'nodes': [[[0]*self.layers]*len(train_data)]*training_iter,
-                    'prob': probability
-                }
+                mask = [[[0]*self.layers]*len(train_data)]*training_iter
             else:
                 self.set_eval(self.eval_dropout)
                 self.set_eval_weighted(self.eval_weighted_dropout)
@@ -87,8 +85,8 @@ class NeuNet:
 
                 for i, data in enumerate(train_data):
 
-                    a_l = self.eval(data, mask.get('nodes')[index][i])
-                    z_l = self.eval_weighted(data, mask.get('nodes')[index][i])
+                    a_l = self.eval(data, mask[index][i])
+                    z_l = self.eval_weighted(data, mask[index][i])
 
                     acc_iter += self.accuracy(train_labels[i], a_l[-1])
                     cost_iter += self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant)
@@ -134,7 +132,7 @@ class NeuNet:
 
         for i in range(1, self.layers):
             a_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
-            a_l[i][mask[i]] = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])[mask[i]]
+            a_l[i] = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1]) * mask[i]
 
         return a_l
 
@@ -149,7 +147,7 @@ class NeuNet:
 
         for i in range(1, self.layers):
             z_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
-            z_l[i][mask[i]] = (np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1])[mask[i]]
+            z_l[i] = (np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]) * mask[i]
 
         return z_l
 
