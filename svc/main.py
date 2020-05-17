@@ -1,5 +1,5 @@
 from svc.net import *
-from svc.config import data_amount, l_nodes, probability, training_iter
+from svc.config import data_amount, l_nodes, training_iter
 
 import matplotlib.pyplot as plt
 from helpers.data import data
@@ -7,12 +7,13 @@ from helpers.data import data
 
 if __name__ == '__main__':
 
-    epoch = None
-    images = data[0][0:data_amount]
-    labels = data[1][0:data_amount]
+    save_epoch = True
+    epoch = 10
+    images = data[0]
+    labels = data[1]
 
     if epoch is not None:
-
+        print('<<< Starting Epoch Training >>>')
         learn_rate = 0.5
 
         neu_net = NeuNetBuilder(l_nodes).act("relu").cost("expquadratic").build()
@@ -25,7 +26,6 @@ if __name__ == '__main__':
                                  labels,
                                  training_iter,
                                  learn_rate=0.5,
-                                 save=False
                                  )
 
             epoch_acc.append(cost[2][-1])
@@ -42,12 +42,14 @@ if __name__ == '__main__':
         plt.ylabel("Cost")
         plt.show()
 
+        if save_epoch:
+            pickle.dump(neu_net, open('train_epoch_20', 'wb'))
+
     else:
 
         learn_rate = 0.5
 
         neu_net = NeuNetBuilder(l_nodes).act("relu").cost("expquadratic").build()
-
         cost = neu_net.train(images,
                              labels,
                              training_iter,

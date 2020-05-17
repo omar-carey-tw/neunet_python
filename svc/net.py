@@ -5,8 +5,6 @@ import os
 
 from typing import *
 
-# todo: Gaussian dropout rate instead of bernoulli
-    # look into refactorting dropout workflow (multiply by mask array instead of index)
 # todo: write test script to find best constant values for train
 
 # I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
