@@ -6,6 +6,8 @@ import os
 from typing import *
 
 # todo: write test script to find best constant values for train
+    # todo: do one for cost as function of learning rate for gausian
+    # todo: do done for cost as function of learing_rate and reg_const
 
 # I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
 

@@ -1,5 +1,5 @@
 from svc.net import *
-from svc.config import data_amount, l_nodes, training_iter
+from svc.config import l_nodes, training_iter
 
 import matplotlib.pyplot as plt
 from helpers.data import data
