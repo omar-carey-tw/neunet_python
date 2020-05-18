@@ -49,10 +49,14 @@ class NeuNet:
 
                 set probability to 1 if dropout is not wanted
         """
-        path_to_obj = (os.getcwd() + '/svc/train_objects/').replace('tests/', '')
-        pickle_obj = "mnistobj_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
-        pickle_cost = "mnistcost_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
-        pickle_acc = "mnistacc_" + "iter_" + str(training_iter) + "_data_" + str(len(train_data))
+
+        dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/'
+        path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')
+        meta_data = str(training_iter) + "_data_" + str(len(train_data))
+
+        pickle_obj = "mnistobj_" + "iter_" + meta_data
+        pickle_cost = "mnistcost_" + "iter_" + meta_data
+        pickle_acc = "mnistacc_" + "iter_" + meta_data
 
         if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
             print("Loading previous training run ...")
