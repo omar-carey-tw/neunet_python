@@ -8,7 +8,7 @@ from helpers.data import data
 if __name__ == '__main__':
 
     save_epoch = True
-    epoch = 10
+    epoch = None
     images = data[0]
     labels = data[1]
 

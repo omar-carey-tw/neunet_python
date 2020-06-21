@@ -4,7 +4,9 @@ from helpers.data import data
 import numpy as np
 import matplotlib.pyplot as plt
 
-n = 10
+n = 25
+min = 0.0
+max = 3.5
 
 l_nodes = [784, 10]
 training_iter = 250
@@ -12,13 +14,13 @@ training_iter = 250
 images = data[0]
 labels = data[1]
 
-learn_rates = np.linspace(0.5, 1.5, n)
+learn_rates = np.linspace(min, max, n)
 
 acc = []
 co = []
 
 for rate in learn_rates:
-    print(rate, '\n')
+    print(rate)
     net = NeuNetBuilder(l_nodes).act("relu").cost("expquadratic").build()
     cost = net.train(images,
                      labels,

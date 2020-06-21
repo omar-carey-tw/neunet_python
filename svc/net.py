@@ -5,6 +5,8 @@ import os
 
 from typing import *
 
+# todo: implement adaptive learning rate
+# todo: look into gaussian dropout
 # todo: write test script to find best constant values for train
     # todo: do one for cost as function of learning rate for gausian
     # todo: do done for cost as function of learing_rate and reg_const
@@ -54,9 +56,9 @@ class NeuNet:
         path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')
         meta_data = str(training_iter) + "_data_" + str(len(train_data))
 
-        pickle_obj = "mnistobj_" + "iter_" + meta_data
-        pickle_cost = "mnistcost_" + "iter_" + meta_data
-        pickle_acc = "mnistacc_" + "iter_" + meta_data
+        pickle_obj = "mnistobj_iter_" + meta_data
+        pickle_cost = "mnistcost_iter_" + meta_data
+        pickle_acc = "mnistacc_iter_" + meta_data
 
         if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
             print("Loading previous training run ...")
