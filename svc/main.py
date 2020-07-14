@@ -54,7 +54,7 @@ if __name__ == '__main__':
                              labels,
                              training_iter,
                              learn_rate=learn_rate,
-                             save=False
+                             save=True
                              )
 
         plt.plot(list(range(training_iter)), cost[1])

@@ -3,7 +3,7 @@ import pytest
 
 from svc.net import *
 
-# TEST_FLAG=true pytest tests
+# python3 -m cProfile -s tottime svc/main.py
 class TestNet:
 
     def test_neunet_instance(self):

@@ -4,12 +4,14 @@ import dill as pickle
 import os
 
 from typing import *
+from helpers.helpers import pickle_data
 
-# todo: implement adaptive learning rate
+# todo: refactor pre train flow in this file (add helpers, or add logic to config file to handle cases
+#  between tests and non test in order to get rid of two separate config and dropout files (4->2))
+
 # todo: look into gaussian dropout
+# todo: implement adaptive learning rate
 # todo: write test script to find best constant values for train
-    # todo: do one for cost as function of learning rate for gausian
-    # todo: do done for cost as function of learing_rate and reg_const
 
 # I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
 
@@ -52,13 +54,7 @@ class NeuNet:
                 set probability to 1 if dropout is not wanted
         """
 
-        dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/'
-        path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')
-        meta_data = str(training_iter) + "_data_" + str(len(train_data))
-
-        pickle_obj = "mnistobj_iter_" + meta_data
-        pickle_cost = "mnistcost_iter_" + meta_data
-        pickle_acc = "mnistacc_iter_" + meta_data
+        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_data(training_iter, train_data)
 
         if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
             print("Loading previous training run ...")
@@ -232,6 +228,7 @@ class NeuNetBuilder:
 
         self.net = NeuNet(l_nodes)
 
+    #todo: <<<<< These derivatives are with respect to activation (no action) >>>>
     def act(self, act_function):
 
         def sigmoid(x):
