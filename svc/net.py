@@ -6,8 +6,8 @@ import os
 from typing import *
 from helpers.helpers import pickle_data
 
-# todo: refactor pre train flow in this file (add helpers, or add logic to config file to handle cases
-#  between tests and non test in order to get rid of two separate config and dropout files (4->2))
+# todo: look into refactoring eval, evaluate and their weighted counterparts (want to keep an evaluate function for use in
+# todo: evaluating single data outside of training) -> Maybe private methods for training?
 
 # todo: look into gaussian dropout
 # todo: implement adaptive learning rate
@@ -67,18 +67,18 @@ class NeuNet:
         else:
 
             if os.environ.get('TEST_FLAG'):
-                from tests.config_test import test_probability
-                if test_probability is not None:
+                from svc.config import test_probability
+                if test_probability is None:
                     self.set_eval(self.evaluate)
                     self.set_eval_weighted(self.evaluate_weighted)
                     mask = [[[1]*self.layers]*len(train_data)]*training_iter
                 else:
                     self.set_eval(self.eval_dropout)
                     self.set_eval_weighted(self.eval_weighted_dropout)
-                    from tests.dropout_test import mask
+                    from helpers.dropout import mask
             else:
                 from svc.config import probability
-                if probability == 1:
+                if probability is None:
                     self.set_eval(self.evaluate)
                     self.set_eval_weighted(self.evaluate_weighted)
                     mask = [[[1]*self.layers]*len(train_data)]*training_iter
