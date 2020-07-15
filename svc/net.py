@@ -7,8 +7,10 @@ from typing import *
 from helpers.helpers import pickle_data
 
 # todo: look into refactoring eval, evaluate and their weighted counterparts (want to keep an evaluate function for use in
-# todo: evaluating single data outside of training) -> Maybe private methods for training?
+    # todo: evaluating single data outside of training) -> Maybe private methods for training?
 
+# todo: try to make probability a param as train, its only really used for mask; refactor how to determine if we are
+    # dropout or not
 # todo: look into gaussian dropout
 # todo: implement adaptive learning rate
 # todo: write test script to find best constant values for train
