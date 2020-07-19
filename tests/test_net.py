@@ -92,16 +92,16 @@ class TestNet:
         self.cleanup_files(test_data_amount, test_training_iter)
         assert cost_testing[1][-1] <= cost_testing[1][0]
 
-    @pytest.mark.flaky(max_runs=10)
-    def test_train_relu_expquadratic_dropout(self, get_test_metadata):
-        test_data_amount, test_training_iter, test_l_nodes = get_test_metadata
-        neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("expquadratic").build()
-
-        train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
-        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, save=True)
-
-        self.cleanup_files(test_data_amount, test_training_iter)
-        assert cost_testing[1][-1] <= cost_testing[1][0]
+    # @pytest.mark.flaky(max_runs=10)
+    # def test_train_relu_expquadratic_dropout(self, get_test_metadata):
+    #     test_data_amount, test_training_iter, test_l_nodes = get_test_metadata
+    #     neu_net = NeuNetBuilder(list(test_l_nodes)).act("relu").cost("expquadratic").build()
+    #
+    #     train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
+    #     cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.01, save=True)
+    #
+    #     self.cleanup_files(test_data_amount, test_training_iter)
+    #     assert cost_testing[1][-1] <= cost_testing[1][0]
 
 
     def cleanup_files(self, test_data_amount, test_training_iter):
