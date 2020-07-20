@@ -17,7 +17,7 @@ def pickle_data(training_iter, train_data):
 
 
 def generate_mask(l_nodes, data_amount, training_iter, probability, save_mask=True):
-
+ 
     mask = [[[1] * len(l_nodes)] * data_amount] * training_iter
 
     if probability:

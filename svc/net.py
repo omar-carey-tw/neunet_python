@@ -8,6 +8,7 @@ from helpers.helpers import pickle_data, generate_mask
 
 # todo: look into refactoring eval, evaluate and their weighted counterparts (want to keep an evaluate function for use in
     # todo: evaluating single data outside of training) -> Maybe private methods for training?
+    # todo: now that mask is base 1 we can just have one eval function cause its being mult by 1
 
 # todo: look into gaussian dropout
 # todo: implement adaptive learning rate

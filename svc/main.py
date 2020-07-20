@@ -12,6 +12,7 @@ if __name__ == '__main__':
     l_nodes = [784, 10]
     training_iter = 100
     data_amount = 100
+
     data = get_data(data_amount)
     images = data[0]
     labels = data[1]
