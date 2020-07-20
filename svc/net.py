@@ -4,13 +4,11 @@ import dill as pickle
 import os
 
 from typing import *
-from helpers.helpers import pickle_data
+from helpers.helpers import pickle_data, generate_mask
 
 # todo: look into refactoring eval, evaluate and their weighted counterparts (want to keep an evaluate function for use in
     # todo: evaluating single data outside of training) -> Maybe private methods for training?
 
-# todo: try to make probability a param as train, its only really used for mask; refactor how to determine if we are
-    # dropout or not
 # todo: look into gaussian dropout
 # todo: implement adaptive learning rate
 # todo: write test script to find best constant values for train
@@ -46,14 +44,13 @@ class NeuNet:
         self.weights = _weights
         self.bias = _bias
 
-    def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, learn_rate=0.5,
-              reg_constant=0, save=False) -> np.array:
+    def train(self, train_data: List[np.array], train_labels: List[np.array], training_iter: int, probability=None,
+              learn_rate=0.5, reg_constant=0, save=False) -> np.array:
         """
             Trains neural net by backpropagation using given helpers:
                 is a list of lists where each list contains helpers
                 expect is an array of the expected helpers
 
-                set probability to 1 if dropout is not wanted
         """
 
         pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_data(training_iter, train_data)
@@ -68,26 +65,13 @@ class NeuNet:
 
         else:
 
-            if os.environ.get('TEST_FLAG'):
-                from svc.config import test_probability
-                if test_probability is None:
-                    self.set_eval(self.evaluate)
-                    self.set_eval_weighted(self.evaluate_weighted)
-                    mask = [[[1]*self.layers]*len(train_data)]*training_iter
-                else:
-                    self.set_eval(self.eval_dropout)
-                    self.set_eval_weighted(self.eval_weighted_dropout)
-                    from helpers.dropout import mask
+            mask = generate_mask(self.l_nodes, len(train_data), training_iter, probability)
+            if probability:
+                self.set_eval(self.eval_dropout)
+                self.set_eval_weighted(self.eval_weighted_dropout)
             else:
-                from svc.config import probability
-                if probability is None:
-                    self.set_eval(self.evaluate)
-                    self.set_eval_weighted(self.evaluate_weighted)
-                    mask = [[[1]*self.layers]*len(train_data)]*training_iter
-                else:
-                    self.set_eval(self.eval_dropout)
-                    self.set_eval_weighted(self.eval_weighted_dropout)
-                    from helpers.dropout import mask
+                self.set_eval(self.evaluate)
+                self.set_eval_weighted(self.evaluate_weighted)
 
             cost = np.zeros(shape=(training_iter, 1))
             acc = np.zeros(shape=(training_iter, 1))
@@ -98,7 +82,6 @@ class NeuNet:
                 acc_iter = 0
 
                 for i, data in enumerate(train_data):
-
                     a_l = self.eval(data, mask[index][i])
                     z_l = self.eval_weighted(data, mask[index][i])
 

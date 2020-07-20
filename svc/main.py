@@ -1,14 +1,18 @@
 from svc.net import *
-from svc.config import l_nodes, training_iter
 
 import matplotlib.pyplot as plt
-from helpers.data import data
+from helpers.helpers import get_data
 
 
 if __name__ == '__main__':
 
     save_epoch = True
     epoch = None
+
+    l_nodes = [784, 10]
+    training_iter = 100
+    data_amount = 100
+    data = get_data(data_amount)
     images = data[0]
     labels = data[1]
 
@@ -54,7 +58,7 @@ if __name__ == '__main__':
                              labels,
                              training_iter,
                              learn_rate=learn_rate,
-                             save=True
+                             save=False
                              )
 
         plt.plot(list(range(training_iter)), cost[1])
