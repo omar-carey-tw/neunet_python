@@ -16,8 +16,8 @@ def pickle_data(training_iter, train_data):
     return pickle_obj, pickle_cost, pickle_acc, path_to_obj
 
 
-def generate_mask(l_nodes, data_amount, training_iter, probability, save_mask=True):
- 
+def generate_mask(l_nodes, data_amount, training_iter, probability, save_mask=False):
+
     mask = [[[1] * len(l_nodes)] * data_amount] * training_iter
 
     if probability:

@@ -6,10 +6,6 @@ import os
 from typing import *
 from helpers.helpers import pickle_data, generate_mask
 
-# todo: look into refactoring eval, evaluate and their weighted counterparts (want to keep an evaluate function for use in
-    # todo: evaluating single data outside of training) -> Maybe private methods for training?
-    # todo: now that mask is base 1 we can just have one eval function cause its being mult by 1
-
 # todo: look into gaussian dropout
 # todo: implement adaptive learning rate
 # todo: write test script to find best constant values for train
@@ -67,12 +63,6 @@ class NeuNet:
         else:
 
             mask = generate_mask(self.l_nodes, len(train_data), training_iter, probability)
-            if probability:
-                self.set_eval(self.eval_dropout)
-                self.set_eval_weighted(self.eval_weighted_dropout)
-            else:
-                self.set_eval(self.evaluate)
-                self.set_eval_weighted(self.evaluate_weighted)
 
             cost = np.zeros(shape=(training_iter, 1))
             acc = np.zeros(shape=(training_iter, 1))
@@ -83,8 +73,8 @@ class NeuNet:
                 acc_iter = 0
 
                 for i, data in enumerate(train_data):
-                    a_l = self.eval(data, mask[index][i])
-                    z_l = self.eval_weighted(data, mask[index][i])
+                    a_l = self.__eval(data, mask[index][i])
+                    z_l = self.__eval_weighted(data, mask[index][i])
 
                     acc_iter += self.accuracy(train_labels[i], a_l[-1])
                     cost_iter += self.cost(a_l[-1], train_labels[i], self.weights[-1], reg_constant)
@@ -118,37 +108,7 @@ class NeuNet:
             self.weights[i - 2] -= weight_error * const
             self.bias[i - 2] -= layer_error * const
 
-    def eval_dropout(self, inputs: np.array, mask) -> np.array:
-        """
-            Evaluates activation layers with dropout
-        """
-
-        a_l = [0.0]*self.layers
-        a_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
-        a_l[0] = self.act(inputs)
-
-        for i in range(1, self.layers):
-            a_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
-            a_l[i] = self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1]) * mask[i]
-
-        return a_l
-
-    def eval_weighted_dropout(self, inputs: List[float], mask) -> np.array:
-        """
-            Evaluates weighted sum layers with dropout
-        """
-
-        z_l = [0.0]*self.layers
-        z_l[0] = np.zeros(shape=(self.l_nodes[0], 1))
-        z_l[0] = inputs
-
-        for i in range(1, self.layers):
-            z_l[i] = np.zeros(shape=(self.l_nodes[i], 1))
-            z_l[i] = (np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]) * mask[i]
-
-        return z_l
-
-    def evaluate(self, inputs: np.array, mask=[]) -> np.array:
+    def evaluate(self, inputs: np.array) -> np.array:
         """
             Evaluates activation layers
         """
@@ -161,7 +121,20 @@ class NeuNet:
 
         return a_l
 
-    def evaluate_weighted(self, inputs: List[float], mask=[]) -> np.array:
+    def __eval(self, inputs: np.array, mask) -> np.array:
+        """
+            Evaluates activation layers
+        """
+
+        a_l = [0.0]*self.layers
+        a_l[0] = self.act(inputs)
+
+        for i in range(1, self.layers):
+            a_l[i] = (self.act(np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1])) * mask[i]
+
+        return a_l
+
+    def __eval_weighted(self, inputs: List[float], mask) -> np.array:
         """
             Evaluates weighted sum layers
         """
@@ -170,7 +143,7 @@ class NeuNet:
         z_l[0] = inputs
 
         for i in range(1, self.layers):
-            z_l[i] = np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
+            z_l[i] = (np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]) * mask[i]
 
         return z_l
 
@@ -189,11 +162,6 @@ class NeuNet:
         return int(delta < tol)
 
     # Setters
-    def set_eval(self, func):
-        self.eval = func
-
-    def set_eval_weighted(self, func):
-        self.eval_weighted = func
 
     def set_act(self, func):
         self.act = func
