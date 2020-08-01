@@ -50,10 +50,10 @@ class NeuNet:
 
         """
 
-        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_data(training_iter, train_data)
+        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_data(training_iter, len(train_data), probability, learn_rate)
 
         if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
-            print("Loading previous training run ...")
+            print(f"Loading trained Net: {pickle_obj}", "\n ----------")
             neunet = pickle.load(open(path_to_obj + pickle_obj, 'rb'))
             cost = pickle.load(open(path_to_obj + pickle_cost, 'rb'))
             acc = pickle.load(open(path_to_obj + pickle_acc, 'rb'))

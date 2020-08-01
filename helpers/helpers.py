@@ -3,11 +3,14 @@ import os
 import dill as pickle
 
 
-def pickle_data(training_iter, train_data):
+def pickle_data(training_iter, train_data_amount, probability, learn_rate):
 
     dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/'
     path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')
-    meta_data = str(training_iter) + "_data_" + str(len(train_data))
+    meta_data = str(training_iter) + \
+                "_data_" + str(train_data_amount) + \
+                "_prob_" + str(probability) + \
+                "_learn_rate_" + str(learn_rate)
 
     pickle_obj = "mnistobj_iter_" + meta_data
     pickle_cost = "mnistcost_iter_" + meta_data
@@ -16,14 +19,15 @@ def pickle_data(training_iter, train_data):
     return pickle_obj, pickle_cost, pickle_acc, path_to_obj
 
 
-def generate_mask(l_nodes, data_amount, training_iter, probability, save_mask=False):
+def generate_mask(l_nodes, data_amount, training_iter, probability):
 
     mask = [[[1] * len(l_nodes)] * data_amount] * training_iter
 
-    if probability:
+    if probability is not None:
 
         distribution = determine_dist(probability)
         mask_file, path_to_mask = mask_metadata(data_amount, training_iter, probability, distribution)
+
         if mask_file not in os.listdir(path_to_mask):
             if distribution == 'bern':
 
@@ -40,10 +44,12 @@ def generate_mask(l_nodes, data_amount, training_iter, probability, save_mask=Fa
                         for index, val in enumerate(l_nodes):
                             mask[i][j][index] = np.random.randn(val, 1)
 
-            if save_mask and not os.getenv('TEST_FLAG'):
+            if os.getenv('SAVE_MASK') and not os.getenv('TEST_FLAG'):
+                print(f"Saving mask: {mask_file}", "\n")
                 pickle.dump(mask, open(path_to_mask + mask_file, 'wb'))
 
         else:
+            print(f"Loading saved mask: {mask_file}", "\n ")
             mask = pickle.load(open(path_to_mask + mask_file, 'rb'))
 
     return mask
@@ -57,8 +63,8 @@ def get_data(data_amount, save_data=True):
 
     if data_file not in os.listdir(path_to_data):
 
-        PATH = "/Users/omarcarey/Desktop/aiproj/data/"
-        mndata = MNIST(PATH)
+        path = "/Users/omarcarey/Desktop/aiproj/data/"
+        mndata = MNIST(path)
 
         images, labels = mndata.load_training_in_batches(data_amount)
 

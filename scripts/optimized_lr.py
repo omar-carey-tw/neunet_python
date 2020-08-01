@@ -1,5 +1,5 @@
 from svc.net import *
-from helpers.data import data
+from helpers.helpers import get_data
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,7 +10,9 @@ max = 3.5
 
 l_nodes = [784, 10]
 training_iter = 250
+data_amount = 100
 
+data = get_data(data_amount)
 images = data[0]
 labels = data[1]
 
