@@ -27,7 +27,8 @@ for rate in learn_rates:
     cost = net.train(images,
                      labels,
                      training_iter,
-                     rate
+                     learn_rate=rate,
+                     save=False
                      )
     co.append(cost[1][-1])
     acc.append(cost[2][-1])
@@ -37,8 +38,11 @@ print(learn_rates)
 fig, axs = plt.subplots(2, 1)
 axs[0].scatter(learn_rates, co)
 axs[0].set_ylabel('Cost')
+axs[0].set_xlabel('Learn Rate')
 
 axs[1].scatter(learn_rates, acc)
 axs[1].set_ylabel('Accuracy')
+axs[0].set_xlabel('Learn Rate')
+
 
 plt.show()

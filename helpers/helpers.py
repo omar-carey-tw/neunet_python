@@ -3,7 +3,7 @@ import os
 import dill as pickle
 
 
-def pickle_data(training_iter, train_data_amount, probability, learn_rate):
+def pickle_data(training_iter, train_data_amount, probability=None, learn_rate=None):
 
     dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/'
     path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')

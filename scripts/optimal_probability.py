@@ -10,7 +10,7 @@ data = get_data(data_amount)
 images = data[0]
 labels = data[1]
 
-probabilities = [0, 0.5, 0.7, 0.9]
+probabilities = [0, 0.5, 0.7, 0.9, 1]
 learn_rate = 0.9
 save_obj = True
 
@@ -26,9 +26,9 @@ for index, probability in enumerate(probabilities):
                          save=save_obj
                          )
     axs[index, 0].plot(list(range(training_iter)), cost[1])
-    axs[index, 0].set_title(f'Cost w/ prob {probability}')
+    axs[index, 0].set_title(f'Cost w/ prob {probability}, LR {learn_rate}')
 
     axs[index, 1].plot(list(range(training_iter)), cost[2])
-    axs[index, 1].set_title(f'Acc w/ prob {probability}')
+    axs[index, 1].set_title(f'Acc w/ prob {probability}, LR {learn_rate}')
 
 plt.show()
