@@ -3,8 +3,8 @@ from svc.net import *
 import matplotlib.pyplot as plt
 
 l_nodes = [784, 10]
-training_iter = 500
-data_amount = 500
+training_iter = 750
+data_amount = 750
 
 data = get_data(data_amount)
 images = data[0]
