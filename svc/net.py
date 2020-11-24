@@ -4,11 +4,13 @@ import dill as pickle
 import os
 
 from typing import *
-from helpers.helpers import pickle_data, generate_mask
+from helpers.helpers import pickle_meta_data, generate_mask
 
-# todo: look into gaussian dropout
-# todo: implement adaptive learning rate
 # todo: write test script to find best constant values for train
+# todo: Stochastic gradient descent
+# todo: convolution neural network
+# todo: look into making each layer independent activation (class and interfaces for layers)
+# todo: implement adaptive learning rate
 
 # I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
 
@@ -50,7 +52,7 @@ class NeuNet:
 
         """
 
-        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_data(training_iter, len(train_data), probability, learn_rate)
+        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(training_iter, len(train_data), probability, learn_rate)
 
         if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
             print(f"Loading trained Net: {pickle_obj}", "\n ----------")
@@ -58,7 +60,12 @@ class NeuNet:
             cost = pickle.load(open(path_to_obj + pickle_cost, 'rb'))
             acc = pickle.load(open(path_to_obj + pickle_acc, 'rb'))
 
-            return neunet, cost, acc
+            result = {
+                "net": neunet,
+                "cost": cost,
+                "accuracy": acc
+            }
+            return result
 
         else:
 
@@ -89,7 +96,13 @@ class NeuNet:
                 pickle.dump(cost, open(path_to_obj + pickle_cost, 'wb'))
                 pickle.dump(acc, open(path_to_obj + pickle_acc, 'wb'))
 
-            return self, cost, acc
+            result = {
+                "net": self,
+                "cost": cost,
+                "accuracy": acc
+            }
+
+            return result
 
     def back_prop(self, act_layers: List[np.array], weight_layers: List[np.array], train_label,
                   learning_rate: float, reg_const: float, train_batch_size):
@@ -110,7 +123,7 @@ class NeuNet:
 
     def evaluate(self, inputs: np.array) -> np.array:
         """
-            Evaluates activation layers
+            Evaluates activation layers, single pass with no mask
         """
 
         a_l = [0.0]*self.layers
@@ -156,7 +169,7 @@ class NeuNet:
 
     def accuracy(self, train_label, output: np.array):
         index = np.argmax(train_label)
-        delta = np.sum(np.abs(output[index] - train_label[index]))
+        delta = np.abs(output[index] - train_label[index])[0]
         tol = 0.01
 
         return int(delta < tol)

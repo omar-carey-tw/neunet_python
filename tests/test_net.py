@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import os
 
-from helpers.helpers import pickle_data
+from helpers.helpers import pickle_meta_data
 from svc.net import NeuNetBuilder
 
 # python3 -m cProfile -s tottime svc/main.py
@@ -60,11 +60,11 @@ class TestNet:
         neu_net = NeuNetBuilder(list(test_l_nodes)).act("sigmoid").cost("quadratic").build()
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
-        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.1, save=True)
+        test_result = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=0.1, save=True)
         learn_rate = 0.1
 
         self.cleanup_files(test_data_amount, test_training_iter, test_learn_rate=learn_rate)
-        assert cost_testing[1][-1] <= cost_testing[1][0]
+        assert test_result.get('cost')[-1] <= test_result.get('cost')[0]
 
     def test_train_relu(self, get_test_metadata):
         test_data_amount, test_training_iter, test_l_nodes = get_test_metadata
@@ -72,12 +72,12 @@ class TestNet:
         learn_rate = 0.01
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
-        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=learn_rate,
-                                     save=True,
-                                     reg_constant=0.5)
+        test_result = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=learn_rate,
+                                    save=True,
+                                    reg_constant=0.5)
 
         self.cleanup_files(test_data_amount, test_training_iter, test_learn_rate=learn_rate)
-        assert cost_testing[1][-1] <= cost_testing[1][0]
+        assert test_result.get('cost')[-1] <= test_result.get('cost')[0]
 
     def test_train_relu_cubic(self, get_test_metadata):
         test_data_amount, test_training_iter, test_l_nodes = get_test_metadata
@@ -85,11 +85,11 @@ class TestNet:
         learn_rate = 0.01
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
-        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=learn_rate, save=True,
-                                     reg_constant=0.5)
+        test_result = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=learn_rate, save=True,
+                                    reg_constant=0.5)
 
         self.cleanup_files(test_data_amount, test_training_iter, test_learn_rate=learn_rate)
-        assert cost_testing[1][-1] <= cost_testing[1][0]
+        assert test_result.get('cost')[-1] <= test_result.get('cost')[0]
 
     @pytest.mark.flaky(max_runs=10)
     def test_train_relu_expquadratic(self, get_test_metadata):
@@ -99,11 +99,11 @@ class TestNet:
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
         learn_rate = 0.01
 
-        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=learn_rate, save=True,
-                                     reg_constant=0.5)
+        test_result = neu_net.train(train_data, train_labels, test_training_iter, learn_rate=learn_rate, save=True,
+                                    reg_constant=0.5)
 
         self.cleanup_files(test_data_amount, test_training_iter, test_learn_rate=learn_rate)
-        assert cost_testing[1][-1] <= cost_testing[1][0]
+        assert test_result.get('cost')[-1] <= test_result.get('cost')[0]
 
     @pytest.mark.flaky(max_runs=10)
     def test_train_relu_expquadratic_dropout(self, get_test_metadata):
@@ -112,17 +112,17 @@ class TestNet:
 
         train_data, train_labels = self.get_test_data(test_data_amount, test_l_nodes)
         probability = 0.8
-        learn_rate=0.01
+        learn_rate = 0.01
 
-        cost_testing = neu_net.train(train_data, train_labels, test_training_iter, probability=probability,
-                                     learn_rate=learn_rate, save=True)
+        test_result = neu_net.train(train_data, train_labels, test_training_iter, probability=probability,
+                                    learn_rate=learn_rate, save=True)
 
         self.cleanup_files(test_data_amount, test_training_iter, test_learn_rate=learn_rate, test_probability=probability)
-        assert cost_testing[1][-1] <= cost_testing[1][0]
+        assert test_result.get('cost')[-1] <= test_result.get('cost')[0]
 
     def cleanup_files(self, test_data_amount, test_training_iter, test_probability=None, test_learn_rate=None):
 
-        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_data(test_training_iter, test_data_amount, test_probability, test_learn_rate)
+        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(test_training_iter, test_data_amount, test_probability, test_learn_rate)
 
         path = (os.getcwd() + '/svc/train_objects/').replace('tests/', '')
 

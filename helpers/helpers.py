@@ -3,7 +3,7 @@ import os
 import dill as pickle
 
 
-def pickle_data(training_iter, train_data_amount, probability=None, learn_rate=None):
+def pickle_meta_data(training_iter, train_data_amount, probability=None, learn_rate=None):
 
     dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/'
     path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')
@@ -12,9 +12,9 @@ def pickle_data(training_iter, train_data_amount, probability=None, learn_rate=N
                 "_prob_" + str(probability) + \
                 "_learn_rate_" + str(learn_rate)
 
-    pickle_obj = "mnistobj_iter_" + meta_data
-    pickle_cost = "mnistcost_iter_" + meta_data
-    pickle_acc = "mnistacc_iter_" + meta_data
+    pickle_obj = "mnist_obj_iter_" + meta_data
+    pickle_cost = "mnist_cost_iter_" + meta_data
+    pickle_acc = "mnist_acc_iter_" + meta_data
 
     return pickle_obj, pickle_cost, pickle_acc, path_to_obj
 
