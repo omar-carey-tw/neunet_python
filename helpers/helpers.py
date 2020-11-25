@@ -5,7 +5,7 @@ import dill as pickle
 
 def pickle_meta_data(training_iter, train_data_amount, probability=None, learn_rate=None):
 
-    dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/'
+    dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python'
     path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')
     meta_data = str(training_iter) + \
                 "_data_" + str(train_data_amount) + \
@@ -44,7 +44,7 @@ def generate_mask(l_nodes, data_amount, training_iter, probability):
                         for index, val in enumerate(l_nodes):
                             mask[i][j][index] = np.random.randn(val, 1)
 
-            if os.getenv('SAVE_MASK') and not os.getenv('TEST_FLAG'):
+            if os.getenv('SAVE_MASK'):
                 print(f"Saving mask: {mask_file}", "\n")
                 pickle.dump(mask, open(path_to_mask + mask_file, 'wb'))
 
@@ -105,3 +105,24 @@ def mask_metadata(data_amount, training_iter, probability, distribution):
     path_to_mask = (dir + 'helpers/data_files/mask/').replace('tests/', '')
 
     return mask_file, path_to_mask
+
+
+def check_previous_train(training_iter, data_amount, probability, learn_rate):
+    result = None
+
+    pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(training_iter, data_amount, probability,
+                                                                        learn_rate)
+
+    if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
+        print(f"Loading trained Net: {pickle_obj}", "\n ----------")
+        neunet = pickle.load(open(path_to_obj + pickle_obj, 'rb'))
+        cost = pickle.load(open(path_to_obj + pickle_cost, 'rb'))
+        acc = pickle.load(open(path_to_obj + pickle_acc, 'rb'))
+
+        result = {
+            "net": neunet,
+            "cost": cost,
+            "accuracy": acc
+        }
+
+    return result

@@ -1,15 +1,14 @@
 import numpy as np
 import numpy.linalg as la
 import dill as pickle
-import os
 
 from typing import *
-from helpers.helpers import pickle_meta_data, generate_mask
+from helpers.helpers import generate_mask, check_previous_train, pickle_meta_data
 
+# todo: look into making each layer independent activation (class and interfaces for layers)
 # todo: write test script to find best constant values for train
 # todo: Stochastic gradient descent
 # todo: convolution neural network
-# todo: look into making each layer independent activation (class and interfaces for layers)
 # todo: implement adaptive learning rate
 
 # I guess a rule of thumb is to use dropout over matrix reg for large networks (allegedly)
@@ -51,24 +50,10 @@ class NeuNet:
                 expect is an array of the expected helpers
 
         """
-
-        pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(training_iter, len(train_data), probability, learn_rate)
-
-        if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
-            print(f"Loading trained Net: {pickle_obj}", "\n ----------")
-            neunet = pickle.load(open(path_to_obj + pickle_obj, 'rb'))
-            cost = pickle.load(open(path_to_obj + pickle_cost, 'rb'))
-            acc = pickle.load(open(path_to_obj + pickle_acc, 'rb'))
-
-            result = {
-                "net": neunet,
-                "cost": cost,
-                "accuracy": acc
-            }
-            return result
-
+        check_previous_run = check_previous_train(training_iter, len(train_data), probability, learn_rate)
+        if check_previous_run:
+            return check_previous_run
         else:
-
             mask = generate_mask(self.l_nodes, len(train_data), training_iter, probability)
 
             cost = np.zeros(shape=(training_iter, 1))
@@ -92,6 +77,8 @@ class NeuNet:
                 acc[index] = acc_iter / train_batch_size
 
             if save:
+                pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(training_iter, len(train_data),
+                                                                                    probability, learn_rate)
                 pickle.dump(self, open(path_to_obj + pickle_obj, 'wb'))
                 pickle.dump(cost, open(path_to_obj + pickle_cost, 'wb'))
                 pickle.dump(acc, open(path_to_obj + pickle_acc, 'wb'))
