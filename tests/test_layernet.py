@@ -3,6 +3,7 @@ from svc.layernet import LayerNeuNetBuilder, LayerNeuNet
 import pytest
 import numpy as np
 
+
 # https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures
 
 
@@ -69,19 +70,25 @@ class TestLayerNeuNetBuilder:
             LayerNeuNetBuilder().build()
 
 
-@pytest.fixture()
-def successful_layernet_init():
-    l_nodes = [10, 7, 5, 3]
-    layer_types = ["relu"] * len(l_nodes)
-    cost_type = "quadratic"
+@pytest.fixture
+def create_test_layernet():
 
-    test_layernet = LayerNeuNetBuilder(). \
-        set_layers(layer_types). \
-        set_cost(cost_type). \
-        set_weights_and_bias(l_nodes). \
-        build()
+    def _test_layernet(l_nodes=[10, 7, 5, 3], layer_types="relu", cost_type="quadratic"):
 
-    return test_layernet
+        if isinstance(layer_types, list):
+            layer_types_list = layer_types
+        else:
+            layer_types_list = [layer_types] * len(l_nodes)
+
+        test_layernet = LayerNeuNetBuilder(). \
+            set_layers(layer_types_list). \
+            set_cost(cost_type). \
+            set_weights_and_bias(l_nodes). \
+            build()
+
+        return test_layernet
+
+    return _test_layernet
 
 
 class TestLayerNeuNet:
@@ -96,9 +103,10 @@ class TestLayerNeuNet:
         assert test_layernet.weights is None
         assert test_layernet.bias is None
 
-    def test_evaluate_success(self, successful_layernet_init):
+    def test_evaluate_success(self, create_test_layernet):
 
-        test_layernet = successful_layernet_init
+        layer_types = ["relu", "sigmoid", "sigmoid", "relu"]
+        test_layernet = create_test_layernet(layer_types=layer_types)
 
         test_input = np.array([np.pi]*test_layernet.l_nodes[0], ndmin=2).transpose()
         test_result = test_layernet.evaluate(test_input)
@@ -107,9 +115,8 @@ class TestLayerNeuNet:
         assert len(test_result[0]) == test_layernet.l_nodes[0]
         assert len(test_result[-1]) == test_layernet.l_nodes[-1]
 
-    def test_evaluate_fail(self, successful_layernet_init):
-
-        test_layernet = successful_layernet_init
+    def test_evaluate_fail(self, create_test_layernet):
+        test_layernet = create_test_layernet()
 
         test_input = np.array([np.pi, np.e], ndmin=2).transpose()
 
@@ -117,6 +124,4 @@ class TestLayerNeuNet:
             test_layernet.evaluate(test_input)
 
     def test_train_success(self):
-
-        #todo: change pytest fixture to take in param to make custom layernet
         assert 0 is 1

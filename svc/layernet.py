@@ -76,12 +76,18 @@ class LayerNeuNetBuilder:
 
     def build(self):
 
-        if self.net.l_nodes is None or self.net.layer_types is None or self.net.layers is None or \
-                self.net.weights is None or self.net.bias is None or self.net.cost_layer is None:
+        if self.net.l_nodes is None \
+                or self.net.layer_types is None \
+                or self.net.layers is None \
+                or self.net.weights is None \
+                or self.net.bias is None \
+                or self.net.cost_layer is None:
+
             raise NameError("One of your constructors is empty")
 
         elif len(self.net.layer_types) != len(self.net.l_nodes):
             raise NameError("Lengths of layer types and number of layers do not match")
+
         elif self.net.layers < 2:
             raise NameError("Network too short, provide more than 2 layers!!")
 
