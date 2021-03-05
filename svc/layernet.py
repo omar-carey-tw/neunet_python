@@ -40,8 +40,8 @@ class LayerNeuNet:
         return a_l
 
     def train(self, data_set, label_set):
-        #todo: consider training_data class to hold z_l, a_l, delta_weights, and delta_of_layers to avoid passing in
-        #todo: and out of functions
+
+        training_constant = 1
 
         for i, data in enumerate(data_set):
 
@@ -52,7 +52,7 @@ class LayerNeuNet:
 
             delta_output = self.cost_layer.dcostdact(a_l[-1], label) * self.layer_types[-1].dactdz(z_l[-1])
 
-            delta_weights, delta_bias = self.back_propragate(a_l, z_l, delta_output)
+            self.back_propragate(a_l, z_l, delta_output, training_constant)
 
     def eval(self, data):
 
@@ -76,24 +76,15 @@ class LayerNeuNet:
 
         return z_l
 
-    def back_propragate(self, a_l, z_l, delta_output):
+    def back_propragate(self, a_l, z_l, delta_l, training_constant):
 
-        delta_weights = [0] * (self.layers - 1)
-        delta_bias = [0] * (self.layers - 1)
+        for i in range(self.layers - 2, -1, -1):
 
-        delta_weights[-1] = np.dot(delta_output, a_l[-2].transpose())
-        delta_bias[-1] = delta_output
-
-        delta_l = np.dot(self.weights[-1].transpose(), delta_output) * self.layer_types[-2].dactdz(z_l[-2])
-
-        for i in range(self.layers - 3, -1, -1):
-
-            delta_bias[i] = delta_l
-            delta_weights[i] = np.dot(delta_l, a_l[i].transpose())
+            delta_weights = np.dot(delta_l, a_l[i].transpose())
+            self.bias[i] -= training_constant * delta_l
 
             delta_l = np.dot(self.weights[i].transpose(), delta_l) * self.layer_types[i].dactdz(z_l[i])
-
-        return delta_weights, delta_bias
+            self.weights[i] -= training_constant * delta_weights
 
 
 class LayerNeuNetBuilder:

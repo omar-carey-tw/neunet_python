@@ -1,6 +1,7 @@
 from svc.layernet import LayerNeuNetBuilder, LayerNeuNet
 
 import pytest
+import copy
 import numpy as np
 
 
@@ -170,9 +171,11 @@ class TestLayerNeuNet:
         with pytest.raises(ValueError):
             test_layernet.eval_weighted(test_input)
 
-    # @pytest.mark.skip
     def test_train_success(self, create_test_layernet, get_test_data):
         test_layernet = create_test_layernet()
+
+        weights_before_train = copy.deepcopy(test_layernet.weights)
+        bias_before_train = copy.deepcopy(test_layernet.bias)
 
         number_of_train_inputs = 1
         node_lengths = test_layernet.l_nodes
@@ -180,3 +183,8 @@ class TestLayerNeuNet:
         test_train_data, test_train_labels = get_test_data(number_of_train_inputs, node_lengths)
 
         test_layernet.train(test_train_data, test_train_labels)
+
+        for i in range(test_layernet.layers - 1):
+            assert np.sum(weights_before_train[i]) != np.sum(test_layernet.weights[i])
+            assert np.sum((bias_before_train[i])) != np.sum(test_layernet.bias[i])
+
