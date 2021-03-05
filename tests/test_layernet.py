@@ -25,7 +25,6 @@ class TestLayerNeuNetBuilder:
         assert test_layerbuilder.net.layers is not None
 
     def test_set_cost(self):
-
         cost_type = "quadratic"
 
         test_layernetbuilder = LayerNeuNetBuilder().set_cost(cost_type)
@@ -35,12 +34,12 @@ class TestLayerNeuNetBuilder:
     def test_build_success(self):
         l_nodes = [1, 2, 3, 4]
         cost_type = "quadratic"
-        layer_types = ["relu"]*len(l_nodes)
+        layer_types = ["relu"] * len(l_nodes)
 
-        test_layernet = LayerNeuNetBuilder().\
-            set_weights_and_bias(l_nodes).\
-            set_layers(layer_types).\
-            set_cost(cost_type).\
+        test_layernet = LayerNeuNetBuilder(). \
+            set_weights_and_bias(l_nodes). \
+            set_layers(layer_types). \
+            set_cost(cost_type). \
             build()
 
         assert test_layernet.weights is not None
@@ -65,14 +64,12 @@ class TestLayerNeuNetBuilder:
             LayerNeuNetBuilder().set_weights_and_bias(l_nodes).set_layers(layer_types).build()
 
     def test_layernet_constructor_not_defined(self):
-
         with pytest.raises(NameError):
             LayerNeuNetBuilder().build()
 
 
 @pytest.fixture
 def create_test_layernet():
-
     def _test_layernet(l_nodes=[10, 7, 5, 3], layer_types="relu", cost_type="quadratic"):
 
         if isinstance(layer_types, list):
@@ -80,21 +77,36 @@ def create_test_layernet():
         else:
             layer_types_list = [layer_types] * len(l_nodes)
 
-        test_layernet = LayerNeuNetBuilder(). \
-            set_layers(layer_types_list). \
-            set_cost(cost_type). \
-            set_weights_and_bias(l_nodes). \
-            build()
+        test_layernet = LayerNeuNetBuilder() \
+            .set_layers(layer_types_list) \
+            .set_cost(cost_type) \
+            .set_weights_and_bias(l_nodes) \
+            .build()
 
         return test_layernet
 
     return _test_layernet
 
 
+@pytest.fixture
+def get_test_data():
+
+    def _get_test_data(data_amount, nodes_list):
+        train_data = [0] * data_amount
+        train_labels = [0] * data_amount
+
+        for i in range(data_amount):
+            train_data[i] = np.random.uniform(size=(nodes_list[0], 1))
+            train_labels[i] = np.random.uniform(size=(nodes_list[-1], 1))
+
+        return train_data, train_labels
+
+    return _get_test_data
+
+
 class TestLayerNeuNet:
 
     def test_success_init(self):
-
         test_layernet = LayerNeuNet()
 
         assert test_layernet.l_nodes is None
@@ -104,11 +116,10 @@ class TestLayerNeuNet:
         assert test_layernet.bias is None
 
     def test_evaluate_success(self, create_test_layernet):
-
         layer_types = ["relu", "sigmoid", "sigmoid", "relu"]
         test_layernet = create_test_layernet(layer_types=layer_types)
 
-        test_input = np.array([np.pi]*test_layernet.l_nodes[0], ndmin=2).transpose()
+        test_input = np.array([np.pi] * test_layernet.l_nodes[0], ndmin=2).transpose()
         test_result = test_layernet.evaluate(test_input)
 
         assert len(test_result) == len(test_layernet.l_nodes)
@@ -123,5 +134,49 @@ class TestLayerNeuNet:
         with pytest.raises(NameError):
             test_layernet.evaluate(test_input)
 
-    def test_train_success(self):
-        assert 0 is 1
+    def test_layernet_eval_success(self, create_test_layernet):
+        test_layernet = create_test_layernet()
+        test_input = np.array([np.pi] * test_layernet.l_nodes[0], ndmin=2).transpose()
+
+        test_result = test_layernet.eval(test_input)
+
+        assert len(test_result) == len(test_layernet.l_nodes)
+        assert len(test_result[0]) == test_layernet.l_nodes[0]
+        assert len(test_result[-1]) == test_layernet.l_nodes[-1]
+
+    def test_layernet_eval_fail(self, create_test_layernet):
+        test_layernet = create_test_layernet()
+
+        test_input = np.array([np.pi, np.e], ndmin=2).transpose()
+
+        with pytest.raises(ValueError):
+            test_layernet.eval(test_input)
+
+    def test_layernet_eval_weighted_success(self, create_test_layernet):
+        test_layernet = create_test_layernet()
+        test_input = np.array([np.pi] * test_layernet.l_nodes[0], ndmin=2).transpose()
+
+        test_result = test_layernet.eval_weighted(test_input)
+
+        assert len(test_result) == len(test_layernet.l_nodes)
+        assert len(test_result[0]) == test_layernet.l_nodes[0]
+        assert len(test_result[-1]) == test_layernet.l_nodes[-1]
+
+    def test_layernet_eval_weighted_fail(self, create_test_layernet):
+        test_layernet = create_test_layernet()
+
+        test_input = np.array([np.pi, np.e], ndmin=2).transpose()
+
+        with pytest.raises(ValueError):
+            test_layernet.eval_weighted(test_input)
+
+    # @pytest.mark.skip
+    def test_train_success(self, create_test_layernet, get_test_data):
+        test_layernet = create_test_layernet()
+
+        number_of_train_inputs = 1
+        node_lengths = test_layernet.l_nodes
+
+        test_train_data, test_train_labels = get_test_data(number_of_train_inputs, node_lengths)
+
+        test_layernet.train(test_train_data, test_train_labels)
