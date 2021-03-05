@@ -2,6 +2,10 @@ from svc.layerfactory import BuildLayerTypes
 
 import numpy as np
 
+# todo: implement training iterations
+# todo: implement saving
+# todo: track accuracy and cost?
+
 
 class LayerNeuNet:
     """
@@ -41,6 +45,7 @@ class LayerNeuNet:
 
     def train(self, data_set, label_set):
 
+        # todo: figure out this consant value
         training_constant = 1
 
         for i, data in enumerate(data_set):
