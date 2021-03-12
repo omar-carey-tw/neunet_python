@@ -127,7 +127,7 @@
 #
 #         pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(test_training_iter, test_data_amount, test_probability, test_learn_rate)
 #
-#         path = (os.getcwd() + '/svc/train_objects/').replace('tests/', '')
+#         path = (os.getcwd() + '/svc/trained_objects/').replace('tests/', '')
 #
 #         os.remove(path + pickle_obj)
 #         os.remove(path + pickle_cost)
@@ -156,7 +156,7 @@
 #                             f"_learn_rate_{learning_rate}"
 #         EXPECTED_ACC_NAME = f"mnist_acc_iter_{test_training_iter}_data_{test_data_amount}_prob_{probability}" \
 #                             f"_learn_rate_{learning_rate}"
-#         EXPECTED_PATH_TO_OBJ = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/svc/train_objects/'
+#         EXPECTED_PATH_TO_OBJ = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/svc/trained_objects/'
 #
 #         test_pickle_obj, test_pickle_cost, test_pickle_acc, test_path_to_obj = pickle_meta_data(test_training_iter,
 #                                                                                                 test_data_amount,

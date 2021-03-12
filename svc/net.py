@@ -77,7 +77,7 @@ class NeuNet:
                 acc[index] = acc_iter / train_batch_size
 
 
-            #todo: consider dumping all three things into one folder (/train_objects/<file>)
+            #todo: consider dumping all three things into one folder (/trained_objects/<file>)
             if save:
                 pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(training_iter, len(train_data),
                                                                                     probability, learn_rate)

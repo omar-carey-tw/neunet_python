@@ -2,21 +2,9 @@ import numpy as np
 import os
 import dill as pickle
 
+from typing import List
 
-def pickle_meta_data(training_iter, train_data_amount, probability=None, learn_rate=None):
-
-    dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python'
-    path_to_obj = (dir + '/svc/train_objects/').replace('tests/', '')
-    meta_data = str(training_iter) + \
-                "_data_" + str(train_data_amount) + \
-                "_prob_" + str(probability) + \
-                "_learn_rate_" + str(learn_rate)
-
-    pickle_obj = "mnist_obj_iter_" + meta_data
-    pickle_cost = "mnist_cost_iter_" + meta_data
-    pickle_acc = "mnist_acc_iter_" + meta_data
-
-    return pickle_obj, pickle_cost, pickle_acc, path_to_obj
+ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace('helpers', '')
 
 
 def generate_mask(l_nodes, data_amount, training_iter, probability):
@@ -107,22 +95,52 @@ def mask_metadata(data_amount, training_iter, probability, distribution):
     return mask_file, path_to_mask
 
 
-def check_previous_train(training_iter, data_amount, probability, learn_rate):
-    result = None
+def check_file(directory, file_name_list: List):
 
-    pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(training_iter, data_amount, probability,
-                                                                        learn_rate)
+    file = os.path.join(ROOT_DIRECTORY, directory, "_".join(file_name_list))
 
-    if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
-        print(f"Loading trained Net: {pickle_obj}", "\n ----------")
-        neunet = pickle.load(open(path_to_obj + pickle_obj, 'rb'))
-        cost = pickle.load(open(path_to_obj + pickle_cost, 'rb'))
-        acc = pickle.load(open(path_to_obj + pickle_acc, 'rb'))
+    if os.path.exists(file):
+        return True
 
-        result = {
-            "net": neunet,
-            "cost": cost,
-            "accuracy": acc
-        }
+    return False
 
-    return result
+
+def pickle_object(directory, file_name, object):
+
+    file_location = os.path.join(ROOT_DIRECTORY, directory, file_name)
+    pickle.dump(object, open(file_location, 'wb'))
+
+# def check_previous_train(training_iter, data_amount, probability, learn_rate):
+#     result = None
+#
+#     pickle_obj, pickle_cost, pickle_acc, path_to_obj = pickle_meta_data(training_iter, data_amount, probability,
+#                                                                         learn_rate)
+#
+#     if pickle_obj and pickle_cost and pickle_acc in os.listdir(path_to_obj):
+#         print(f"Loading trained Net: {pickle_obj}", "\n ----------")
+#         neunet = pickle.load(open(path_to_obj + pickle_obj, 'rb'))
+#         cost = pickle.load(open(path_to_obj + pickle_cost, 'rb'))
+#         acc = pickle.load(open(path_to_obj + pickle_acc, 'rb'))
+#
+#         result = {
+#             "net": neunet,
+#             "cost": cost,
+#             "accuracy": acc
+#         }
+#
+#     return result
+
+# def pickle_meta_data(training_iter, train_data_amount, probability=None, learn_rate=None):
+#
+#     dir = os.path.dirname(os.path.abspath(__file__))
+#     path_to_obj = (dir + '/svc/trained_objects/').replace('tests/', '')
+#     meta_data = str(training_iter) + \
+#                 "_data_" + str(train_data_amount) + \
+#                 "_prob_" + str(probability) + \
+#                 "_learn_rate_" + str(learn_rate)
+#
+#     pickle_obj = "mnist_obj_iter_" + meta_data
+#     pickle_cost = "mnist_cost_iter_" + meta_data
+#     pickle_acc = "mnist_acc_iter_" + meta_data
+#
+#     return pickle_obj, pickle_cost, pickle_acc, path_to_obj

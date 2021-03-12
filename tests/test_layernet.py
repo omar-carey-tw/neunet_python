@@ -1,9 +1,10 @@
-from svc.layernet import LayerNeuNetBuilder, LayerNeuNet
+from svc.layernet import LayerNeuNetBuilder, LayerNeuNet, ROOT_DIRECTORY
 
 import pytest
 import copy
 import numpy as np
-
+import os
+import shutil
 
 # https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures
 
@@ -171,20 +172,39 @@ class TestLayerNeuNet:
         with pytest.raises(ValueError):
             test_layernet.eval_weighted(test_input)
 
+    @pytest.mark.flaky(max_runs=5)
     def test_train_success(self, create_test_layernet, get_test_data):
         test_layernet = create_test_layernet()
 
         weights_before_train = copy.deepcopy(test_layernet.weights)
         bias_before_train = copy.deepcopy(test_layernet.bias)
 
-        number_of_train_inputs = 1
+        data_amount = 1
         node_lengths = test_layernet.l_nodes
+        training_iterations = 10
 
-        test_train_data, test_train_labels = get_test_data(number_of_train_inputs, node_lengths)
+        test_train_data, test_train_labels = get_test_data(data_amount, node_lengths)
 
-        test_layernet.train(test_train_data, test_train_labels)
+        test_layernet.train(test_train_data, test_train_labels, training_iterations)
 
         for i in range(test_layernet.layers - 1):
             assert np.sum(weights_before_train[i]) != np.sum(test_layernet.weights[i])
             assert np.sum((bias_before_train[i])) != np.sum(test_layernet.bias[i])
 
+    def test_train_save(self, create_test_layernet, get_test_data):
+        test_layernet = create_test_layernet()
+
+        data_amount = 1
+        node_lengths = test_layernet.l_nodes
+        training_iterations = 10
+        file_name = f"mnist_obj_iter_{training_iterations}_data_{data_amount}_learn_rate_{0.5}"
+
+        test_train_data, test_train_labels = get_test_data(data_amount, node_lengths)
+
+        test_layernet.train(test_train_data, test_train_labels, training_iterations, save=True)
+
+        test_trained_object = os.path.join(ROOT_DIRECTORY, "svc", "trained_objects", file_name)
+
+        assert os.path.exists(test_trained_object)
+
+        os.remove(test_trained_object)

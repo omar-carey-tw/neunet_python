@@ -1,10 +1,14 @@
 from svc.layerfactory import BuildLayerTypes
+from helpers.helpers import pickle_object
 
 import numpy as np
+import os
 
-# todo: implement training iterations
-# todo: implement saving
+# todo: implement saving for train objects
+# todo: clean up saving for data and masks
 # todo: track accuracy and cost?
+
+ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace("/svc", "")
 
 
 class LayerNeuNet:
@@ -43,21 +47,27 @@ class LayerNeuNet:
 
         return a_l
 
-    def train(self, data_set, label_set):
+    def train(self, data_set, label_set, training_iterations, learning_rate=0.5, save=False):
 
-        # todo: figure out this consant value
-        training_constant = 1
+        for index in range(training_iterations):
 
-        for i, data in enumerate(data_set):
+            training_constant = learning_rate / len(data_set)
 
-            label = label_set[i]
+            for i, data in enumerate(data_set):
 
-            a_l = self.eval(data)
-            z_l = self.eval_weighted(data)
+                label = label_set[i]
 
-            delta_output = self.cost_layer.dcostdact(a_l[-1], label) * self.layer_types[-1].dactdz(z_l[-1])
+                a_l = self.eval(data)
+                z_l = self.eval_weighted(data)
 
-            self.back_propragate(a_l, z_l, delta_output, training_constant)
+                delta_output = self.cost_layer.dcostdact(a_l[-1], label) * self.layer_types[-1].dactdz(z_l[-1])
+
+                self.back_propragate(a_l, z_l, delta_output, training_constant)
+
+        if save:
+            file_name = f"mnist_obj_iter_{training_iterations}_data_{len(data_set)}_learn_rate_{learning_rate}"
+            directory = os.path.join(ROOT_DIRECTORY, "svc", "trained_objects")
+            pickle_object(directory, file_name, self)
 
     def eval(self, data):
 
