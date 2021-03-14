@@ -1,3 +1,5 @@
 numpy
-pytest
+pytest==5.4.1
 dill
+python-mnist
+flaky

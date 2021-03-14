@@ -4,9 +4,16 @@ from helpers.helpers import pickle_object
 import numpy as np
 import os
 
-# todo: implement saving for train objects
-# todo: clean up saving for data and masks
-# todo: track accuracy and cost?
+# todo: use new check, pickle methods in get_data and get_mask
+
+# todo: use environment variables for directory and filename? Us built in os logic to
+#  use a default value if no value present. Could clean up tests
+# todo: implement use already saved layer objects
+
+# todo: track accuracy and cost
+#  think about saving it as a constructor field in layernet to only have to save one thing
+
+# todo: implement using masks
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace("/svc", "")
 
@@ -65,9 +72,9 @@ class LayerNeuNet:
                 self.back_propragate(a_l, z_l, delta_output, training_constant)
 
         if save:
-            file_name = f"mnist_obj_iter_{training_iterations}_data_{len(data_set)}_learn_rate_{learning_rate}"
+            file_name_list = ["mnist_obj_iter", f"{training_iterations}", f"data_{len(data_set)}", f"learning_rate_{learning_rate}"]
             directory = os.path.join(ROOT_DIRECTORY, "svc", "trained_objects")
-            pickle_object(directory, file_name, self)
+            pickle_object(directory, file_name_list, self)
 
     def eval(self, data):
 

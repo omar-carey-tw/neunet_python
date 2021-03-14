@@ -2,6 +2,7 @@ import numpy as np
 import os
 import dill as pickle
 
+from mnist import MNIST
 from typing import List
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace('helpers', '')
@@ -44,34 +45,38 @@ def generate_mask(l_nodes, data_amount, training_iter, probability):
 
 
 def get_data(data_amount, save_data=True):
-    from mnist import MNIST
 
-    data_file = 'data_amount_' + str(data_amount)
-    path_to_data = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/helpers/data_files/data/'
+    data_file_list = ["data_amount", f"{str(data_amount)}"]
+    directory = os.path.join("helpers", "data_files", "data")
+    checked_file = check_file(directory, data_file_list)
+    data = {}
 
-    if data_file not in os.listdir(path_to_data):
+    if checked_file:
+
+        # data = pickle.load(open(path_to_data + data_file, 'rb'))
+        pass
+
+    else:
 
         path = "/Users/omarcarey/Desktop/aiproj/data/"
         mndata = MNIST(path)
 
         images, labels = mndata.load_training_in_batches(data_amount)
 
-        proc_labels = np.zeros(shape=(len(labels), 10, 1))
-        proc_images = np.zeros(shape=(len(images), len(images[0]), 1))
+        processed_labels = np.zeros(shape=(len(labels), 10, 1))
+        processed_images = np.zeros(shape=(len(images), len(images[0]), 1))
 
         gray_scale = 255
 
         for index, val in enumerate(labels):
-            proc_labels[index][val] = 1
-            proc_images[index] = np.array(images[index]).reshape(len(images[index]), 1) / gray_scale
+            processed_labels[index][val] = 1
+            processed_images[index] = np.array(images[index]).reshape(len(images[index]), 1) / gray_scale
 
-        data = (proc_images, proc_labels)
+        data["images"] = processed_images
+        data["labels"] = processed_labels
+
         if save_data:
-            pickle.dump(data, open(path_to_data + data_file, 'wb'))
-
-    else:
-
-        data = pickle.load(open(path_to_data + data_file, 'rb'))
+            pickle_object(directory, data_file_list, data)
 
     return data
 
@@ -105,10 +110,11 @@ def check_file(directory, file_name_list: List):
     return False
 
 
-def pickle_object(directory, file_name, object):
+def pickle_object(directory, file_name_list, object):
 
-    file_location = os.path.join(ROOT_DIRECTORY, directory, file_name)
+    file_location = os.path.join(ROOT_DIRECTORY, directory, "_".join(file_name_list))
     pickle.dump(object, open(file_location, 'wb'))
+
 
 # def check_previous_train(training_iter, data_amount, probability, learn_rate):
 #     result = None

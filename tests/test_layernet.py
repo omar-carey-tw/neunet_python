@@ -4,7 +4,6 @@ import pytest
 import copy
 import numpy as np
 import os
-import shutil
 
 # https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures
 
@@ -197,12 +196,10 @@ class TestLayerNeuNet:
         data_amount = 1
         node_lengths = test_layernet.l_nodes
         training_iterations = 10
-        file_name = f"mnist_obj_iter_{training_iterations}_data_{data_amount}_learn_rate_{0.5}"
+        file_name = f"mnist_obj_iter_{training_iterations}_data_{data_amount}_learning_rate_{0.5}"
 
         test_train_data, test_train_labels = get_test_data(data_amount, node_lengths)
-
         test_layernet.train(test_train_data, test_train_labels, training_iterations, save=True)
-
         test_trained_object = os.path.join(ROOT_DIRECTORY, "svc", "trained_objects", file_name)
 
         assert os.path.exists(test_trained_object)

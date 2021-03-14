@@ -1,4 +1,4 @@
-from helpers.helpers import check_file, pickle_object
+from helpers.helpers import check_file, pickle_object, get_data
 from svc.layernet import ROOT_DIRECTORY
 
 import os
@@ -21,7 +21,16 @@ def write_test_file():
     yield test_directory, test_filename
 
     f.close()
-    shutil.rmtree(ROOT_DIRECTORY + "/temp")
+
+
+@pytest.fixture(autouse=True)
+def clean_up():
+    yield
+
+    path_to_temp = os.path.join(ROOT_DIRECTORY, "temp")
+
+    if os.path.exists(path_to_temp):
+        shutil.rmtree(ROOT_DIRECTORY + "/temp")
 
 
 class TestHelpers:
@@ -36,13 +45,22 @@ class TestHelpers:
 
         test_pickle_object = "This is a test"
         test_directory = os.path.join("temp", "test")
-        test_filename = "name_of_file"
+        test_filename_list = ["name", "of", "file"]
+
+        test_filename = "_".join(test_filename_list)
 
         test_file_location = os.path.join(ROOT_DIRECTORY, test_directory, test_filename)
         os.makedirs(test_file_location.replace(test_filename, ""))
 
-        pickle_object(test_directory, test_filename, test_pickle_object)
+        pickle_object(test_directory, test_filename_list, test_pickle_object)
 
         assert os.path.exists(test_file_location)
 
-        shutil.rmtree(ROOT_DIRECTORY + "/temp")
+    def test_get_unsaved_data_no_storage(self):
+
+        test_data_amount = 250
+        test_data = get_data(test_data_amount, save_data=False)
+
+        assert len(test_data.get("images")) == test_data_amount
+        assert len(test_data.get("labels")) == test_data_amount
+
