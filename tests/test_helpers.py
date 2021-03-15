@@ -9,7 +9,6 @@ import shutil
 @pytest.fixture
 def write_test_file():
 
-    test_pickle_object = "This is a test"
     test_directory = "temp/test"
     test_filename = ["name", "of", "file"]
 

@@ -1,8 +1,9 @@
 import numpy as np
 import os
 import dill as pickle
+import tensorflow as tf
+import tensorflow_datasets as tfds
 
-from mnist import MNIST
 from typing import List
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace('helpers', '')
@@ -43,7 +44,7 @@ def generate_mask(l_nodes, data_amount, training_iter, probability):
 
     return mask
 
-
+#todo look into https://www.tensorflow.org/datasets/api_docs/python/tfds/core/DatasetBuilder
 def get_data(data_amount, save_data=True):
 
     data_file_list = ["data_amount", f"{str(data_amount)}"]
@@ -58,25 +59,33 @@ def get_data(data_amount, save_data=True):
 
     else:
 
-        path = "/Users/omarcarey/Desktop/aiproj/data/"
-        mndata = MNIST(path)
+        mnist_data_path = os.path.join(ROOT_DIRECTORY, "mnistdataset")
 
-        images, labels = mndata.load_training_in_batches(data_amount)
+        (data) = tfds.as_numpy(tfds.load(
+            'mnist',
+            split='test',
+            data_dir=mnist_data_path,
+            batch_size=data_amount,
+            as_supervised=True
+        ))
 
-        processed_labels = np.zeros(shape=(len(labels), 10, 1))
-        processed_images = np.zeros(shape=(len(images), len(images[0]), 1))
+        print(data.label, data.features)
+        # images, labels = mndata.load_training_in_batches(data_amount)
 
-        gray_scale = 255
-
-        for index, val in enumerate(labels):
-            processed_labels[index][val] = 1
-            processed_images[index] = np.array(images[index]).reshape(len(images[index]), 1) / gray_scale
-
-        data["images"] = processed_images
-        data["labels"] = processed_labels
-
-        if save_data:
-            pickle_object(directory, data_file_list, data)
+        # processed_labels = np.zeros(shape=(len(labels), 10, 1))
+        # processed_images = np.zeros(shape=(len(images), len(images[0]), 1))
+        #
+        # gray_scale = 255
+        #
+        # for index, val in enumerate(labels):
+        #     processed_labels[index][val] = 1
+        #     processed_images[index] = np.array(images[index]).reshape(len(images[index]), 1) / gray_scale
+        #
+        # data["images"] = processed_images
+        # data["labels"] = processed_labels
+        #
+        # if save_data:
+        #     pickle_object(directory, data_file_list, data)
 
     return data
 
@@ -102,7 +111,9 @@ def mask_metadata(data_amount, training_iter, probability, distribution):
 
 def check_file(directory, file_name_list: List):
 
-    file = os.path.join(ROOT_DIRECTORY, directory, "_".join(file_name_list))
+    file_name = "_".join(file_name_list)
+
+    file = os.path.join(ROOT_DIRECTORY, directory, file_name)
 
     if os.path.exists(file):
         return True
@@ -112,7 +123,8 @@ def check_file(directory, file_name_list: List):
 
 def pickle_object(directory, file_name_list, object):
 
-    file_location = os.path.join(ROOT_DIRECTORY, directory, "_".join(file_name_list))
+    file_name = "_".join(file_name_list)
+    file_location = os.path.join(ROOT_DIRECTORY, directory, file_name)
     pickle.dump(object, open(file_location, 'wb'))
 
 
