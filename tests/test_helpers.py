@@ -57,7 +57,7 @@ class TestHelpers:
 
     def test_get_unsaved_data_no_storage(self):
 
-        test_data_amount = 250
+        test_data_amount = 3
         test_data = get_data(test_data_amount, save_data=False)
 
         assert len(test_data.get("images")) == test_data_amount

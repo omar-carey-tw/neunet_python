@@ -68,12 +68,9 @@ def get_data(data_amount, save_data=True):
 
         gray_scale = 255
 
-        for index, val in enumerate(labels):
-            processed_labels[index][val] = 1
-            processed_images[index] = np.array(images[index]).reshape(len(images[index]), 1) / gray_scale
-
-        data["images"] = processed_images
-        data["labels"] = processed_labels
+        for i in range(data_amount):
+            processed_labels[i][labels[i]] = 1
+            processed_images[i] = np.array(images[i]).reshape(len(images[i]), 1) / gray_scale
 
         processed_data = {
             "images": processed_images,
