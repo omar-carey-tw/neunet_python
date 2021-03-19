@@ -63,8 +63,8 @@ def get_data(data_amount, save_data=True):
 
         images, labels = data.get("images"), data.get("labels")
 
-        processed_labels = np.zeros(shape=(len(labels), 10, 1))
-        processed_images = np.zeros(shape=(len(images), len(images[0]), 1))
+        processed_labels = np.zeros(shape=(data_amount, 10, 1))
+        processed_images = np.zeros(shape=(data_amount, len(images[0]), 1))
 
         gray_scale = 255
 

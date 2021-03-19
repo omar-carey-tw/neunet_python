@@ -5,3 +5,4 @@ __pycache__*
 .vscode/
 temp/
 .DS_Store
+mnistdataset/FULL_SET

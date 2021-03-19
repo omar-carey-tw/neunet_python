@@ -4,12 +4,7 @@ from helpers.helpers import pickle_object
 import numpy as np
 import os
 
-# todo: use new check, pickle methods in get_data and get_mask
-
-# todo: use environment variables for directory and filename? Us built in os logic to
-#  use a default value if no value present. Could clean up tests
-# todo: implement use already saved layer objects
-
+#todo: write load_pickle helper function, use it in get_data and in train if checked_file
 # todo: track accuracy and cost
 #  think about saving it as a constructor field in layernet to only have to save one thing
 

@@ -63,3 +63,19 @@ class TestHelpers:
         assert len(test_data.get("images")) == test_data_amount
         assert len(test_data.get("labels")) == test_data_amount
 
+    def test_get_saved_data(self):
+
+        test_data_amount = 3
+        test_object = {
+            "images": [0]*test_data_amount,
+            "labels": [0]*test_data_amount
+        }
+
+        directory = os.path.join("helpers", "data_files", "data")
+        file_name_list = ["data_amount", f"{test_data_amount}"]
+        pickle_object(directory, file_name_list, test_object)
+
+        test_data = get_data(test_data_amount, save_data=False)
+
+        assert len(test_data.get("images")) == test_data_amount
+        assert len(test_data.get("labels")) == test_data_amount
