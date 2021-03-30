@@ -1,5 +1,5 @@
 from svc.layerfactory import BuildLayerTypes
-from helpers.helpers import pickle_object
+from helpers.helpers import pickle_object, check_file
 
 import numpy as np
 import os
@@ -11,7 +11,6 @@ import os
 # todo: implement using masks
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace("/svc", "")
-
 
 class LayerNeuNet:
     """
@@ -51,25 +50,31 @@ class LayerNeuNet:
 
     def train(self, data_set, label_set, training_iterations, learning_rate=0.5, save=False):
 
-        for index in range(training_iterations):
+        file_name_list = ["mnist_obj_iter", f"{training_iterations}", f"data_{len(data_set)}",
+                          f"learning_rate_{learning_rate}"]
+        directory = os.path.join("svc", "trained_objects")
 
-            training_constant = learning_rate / len(data_set)
+        if check_file(directory, file_name_list):
+            pass
+        else:
 
-            for i, data in enumerate(data_set):
+            for index in range(training_iterations):
 
-                label = label_set[i]
+                training_constant = learning_rate / len(data_set)
 
-                a_l = self.eval(data)
-                z_l = self.eval_weighted(data)
+                for i, data in enumerate(data_set):
 
-                delta_output = self.cost_layer.dcostdact(a_l[-1], label) * self.layer_types[-1].dactdz(z_l[-1])
+                    label = label_set[i]
 
-                self.back_propragate(a_l, z_l, delta_output, training_constant)
+                    a_l = self.eval(data)
+                    z_l = self.eval_weighted(data)
 
-        if save:
-            file_name_list = ["mnist_obj_iter", f"{training_iterations}", f"data_{len(data_set)}", f"learning_rate_{learning_rate}"]
-            directory = os.path.join(ROOT_DIRECTORY, "svc", "trained_objects")
-            pickle_object(directory, file_name_list, self)
+                    delta_output = self.cost_layer.dcostdact(a_l[-1], label) * self.layer_types[-1].dactdz(z_l[-1])
+
+                    self.back_propragate(a_l, z_l, delta_output, training_constant)
+
+            if save:
+                pickle_object(directory, file_name_list, self)
 
     def eval(self, data):
 

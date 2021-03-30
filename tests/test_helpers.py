@@ -63,6 +63,22 @@ class TestHelpers:
         assert len(test_data.get("images")) == test_data_amount
         assert len(test_data.get("labels")) == test_data_amount
 
+    def test_get_unsaved_data_with_storage(self):
+
+        test_data_amount = 3
+        test_data = get_data(test_data_amount, save_data=True)
+
+        directory = os.path.join("helpers", "data_files", "data")
+        file_name_list = ["data_amount", f"{test_data_amount}"]
+        test_file_name = "_".join(file_name_list)
+        test_file_path = os.path.join(ROOT_DIRECTORY, directory, test_file_name)
+
+        assert len(test_data.get("images")) == test_data_amount
+        assert len(test_data.get("labels")) == test_data_amount
+        assert os.path.exists(test_file_path)
+
+        os.remove(test_file_path)
+
     def test_get_saved_data(self):
 
         test_data_amount = 3
@@ -73,9 +89,14 @@ class TestHelpers:
 
         directory = os.path.join("helpers", "data_files", "data")
         file_name_list = ["data_amount", f"{test_data_amount}"]
+        test_file_name = "_".join(file_name_list)
+        test_file_path = os.path.join(ROOT_DIRECTORY, directory, test_file_name)
+
         pickle_object(directory, file_name_list, test_object)
 
         test_data = get_data(test_data_amount, save_data=False)
 
         assert len(test_data.get("images")) == test_data_amount
         assert len(test_data.get("labels")) == test_data_amount
+
+        os.remove(test_file_path)

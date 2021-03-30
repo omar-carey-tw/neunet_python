@@ -56,7 +56,6 @@ def get_data(data_amount, save_data=True):
 
         data = pickle.load(open(path_to_data, 'rb'))
 
-        return data
     else:
         path_to_full_set = os.path.join(ROOT_DIRECTORY, "mnistdataset", "FULL_SET")
         data = pickle.load(open(path_to_full_set, 'rb'))
@@ -77,7 +76,14 @@ def get_data(data_amount, save_data=True):
             "labels": processed_labels
         }
 
-        return processed_data
+        data = processed_data
+
+    if save_data:
+        file_name_list = ["data_amount", f"{data_amount}"]
+        directory = os.path.join("helpers", "data_files", "data")
+        pickle_object(directory, file_name_list, data)
+
+    return data
 
 
 def determine_dist(probability):
