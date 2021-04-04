@@ -114,6 +114,12 @@ class LayerNeuNet:
             delta_l = np.dot(self.weights[i].transpose(), delta_l) * self.layer_types[i].dactdz(z_l[i])
             self.weights[i] -= training_constant * delta_weights
 
+    def check_accuracy(self, train_label, output: np.array, tol=0.01):
+        index = np.argmax(train_label)
+        delta = np.abs(output[index] - train_label[index])
+
+        return int(delta < tol)
+
 
 class LayerNeuNetBuilder:
 

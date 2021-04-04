@@ -5,6 +5,7 @@ import copy
 import numpy as np
 import os
 
+
 # https://docs.pytest.org/en/stable/fixture.html#factories-as-fixtures
 
 
@@ -91,7 +92,6 @@ def create_test_layernet():
 
 @pytest.fixture
 def get_test_data():
-
     def _get_test_data(data_amount, nodes_list):
         train_data = [0] * data_amount
         train_labels = [0] * data_amount
@@ -115,6 +115,26 @@ class TestLayerNeuNet:
         assert test_layernet.layers is None
         assert test_layernet.weights is None
         assert test_layernet.bias is None
+        assert test_layernet.accuracy == []
+        assert test_layernet.cost == []
+
+    def test_accuracy_true(self, create_test_layernet):
+        test_layernet = create_test_layernet()
+        test_output = np.array([1, 0, 0])
+        test_label = np.array([1, 0, 0])
+
+        checked_accuracy = test_layernet.check_accuracy(test_label, test_output)
+
+        assert checked_accuracy is True
+
+    def test_accuracy_false(self, create_test_layernet):
+        test_layernet = create_test_layernet()
+        test_output = np.array([0, 1, 0])
+        test_label = np.array([1, 0, 0])
+
+        checked_accuracy = test_layernet.check_accuracy(test_label, test_output)
+
+        assert checked_accuracy is False
 
     def test_evaluate_success(self, create_test_layernet):
         layer_types = ["relu", "sigmoid", "sigmoid", "relu"]
@@ -214,7 +234,8 @@ class TestLayerNeuNet:
         training_iterations = 10
         test_train_data, test_train_labels = get_test_data(data_amount, node_lengths)
 
-        trained_seeded_layernet = layernet_for_seeding.train(test_train_data, test_train_labels, training_iterations, save=True)
+        trained_seeded_layernet = layernet_for_seeding.train(test_train_data, test_train_labels, training_iterations,
+                                                             save=True)
 
         trained_seeded_weights = copy.deepcopy(trained_seeded_layernet.weights)
         trained_seeded_bias = copy.deepcopy(trained_seeded_layernet.bias)
