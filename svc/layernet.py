@@ -4,9 +4,9 @@ from helpers.helpers import pickle_object, check_file, pickle_load, generate_mas
 import numpy as np
 import os
 
-# todo: implement using masks
-
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace("/svc", "")
+
+# todo: Add a new more efficient cost function
 
 
 class LayerNeuNet:
