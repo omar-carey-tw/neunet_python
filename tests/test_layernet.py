@@ -1,4 +1,5 @@
 from svc.layernet import LayerNeuNetBuilder, LayerNeuNet, ROOT_DIRECTORY
+from helpers.helpers import generate_mask
 
 import pytest
 import copy
@@ -105,6 +106,17 @@ def get_test_data():
     return _get_test_data
 
 
+@pytest.fixture
+def get_test_mask():
+    def _get_test_mask(l_nodes, data_amount, training_iter, probability):
+
+        mask = generate_mask(l_nodes, data_amount, training_iter, probability)
+
+        return mask
+
+    return _get_test_mask
+
+
 class TestLayerNeuNet:
 
     def test_success_init(self):
@@ -155,41 +167,45 @@ class TestLayerNeuNet:
         with pytest.raises(NameError):
             test_layernet.evaluate(test_input)
 
-    def test_layernet_eval_success(self, create_test_layernet):
+    def test_layernet_eval_success(self, create_test_layernet, get_test_mask):
         test_layernet = create_test_layernet()
         test_input = np.array([np.pi] * test_layernet.l_nodes[0], ndmin=2).transpose()
+        test_mask = get_test_mask(test_layernet.l_nodes, 1, 1, probability=0.9)
 
-        test_result = test_layernet.eval(test_input)
+        test_result = test_layernet.eval(test_input, test_mask[0][0])
 
         assert len(test_result) == len(test_layernet.l_nodes)
         assert len(test_result[0]) == test_layernet.l_nodes[0]
         assert len(test_result[-1]) == test_layernet.l_nodes[-1]
 
-    def test_layernet_eval_fail(self, create_test_layernet):
+    def test_layernet_eval_fail(self, create_test_layernet, get_test_mask):
         test_layernet = create_test_layernet()
+        test_mask = get_test_mask(test_layernet.l_nodes, 1, 1, probability=0.9)
 
         test_input = np.array([np.pi, np.e], ndmin=2).transpose()
 
         with pytest.raises(ValueError):
-            test_layernet.eval(test_input)
+            test_layernet.eval(test_input, test_mask[0][0])
 
-    def test_layernet_eval_weighted_success(self, create_test_layernet):
+    def test_layernet_eval_weighted_success(self, create_test_layernet, get_test_mask):
         test_layernet = create_test_layernet()
         test_input = np.array([np.pi] * test_layernet.l_nodes[0], ndmin=2).transpose()
+        test_mask = get_test_mask(test_layernet.l_nodes, 1, 1, probability=0.9)
 
-        test_result = test_layernet.eval_weighted(test_input)
+        test_result = test_layernet.eval_weighted(test_input, test_mask[0][0])
 
         assert len(test_result) == len(test_layernet.l_nodes)
         assert len(test_result[0]) == test_layernet.l_nodes[0]
         assert len(test_result[-1]) == test_layernet.l_nodes[-1]
 
-    def test_layernet_eval_weighted_fail(self, create_test_layernet):
+    def test_layernet_eval_weighted_fail(self, create_test_layernet, get_test_mask):
         test_layernet = create_test_layernet()
 
         test_input = np.array([np.pi, np.e], ndmin=2).transpose()
+        test_mask = get_test_mask(test_layernet.l_nodes, 1, 1, probability=0.9)
 
         with pytest.raises(ValueError):
-            test_layernet.eval_weighted(test_input)
+            test_layernet.eval_weighted(test_input, test_mask[0][0])
 
     @pytest.mark.flaky(max_runs=5)
     def test_train_success(self, create_test_layernet, get_test_data):

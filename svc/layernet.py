@@ -1,5 +1,5 @@
 from svc.layerfactory import BuildLayerTypes
-from helpers.helpers import pickle_object, check_file, pickle_load
+from helpers.helpers import pickle_object, check_file, pickle_load, generate_mask
 
 import numpy as np
 import os
@@ -47,7 +47,7 @@ class LayerNeuNet:
 
         return a_l
 
-    def train(self, data_set, label_set, training_iterations, learning_rate=0.5, save=False, reg_const=0):
+    def train(self, data_set, label_set, training_iterations, learning_rate=0.5, save=False, reg_const=0, probability=None):
 
         file_name_list = ["mnist_obj_iter", f"{training_iterations}", f"data_{len(data_set)}",
                           f"learning_rate_{learning_rate}"]
@@ -58,6 +58,8 @@ class LayerNeuNet:
             return trained_network
 
         else:
+
+            mask = generate_mask(self.l_nodes, len(data_set), training_iterations, probability)
 
             self.cost = np.zeros(shape=(training_iterations, 1))
             self.accuracy = np.zeros(shape=(training_iterations, 1))
@@ -73,8 +75,8 @@ class LayerNeuNet:
 
                     label = label_set[i]
 
-                    a_l = self.eval(data)
-                    z_l = self.eval_weighted(data)
+                    a_l = self.eval(data, mask[index][i])
+                    z_l = self.eval_weighted(data, mask[index][i])
 
                     accuracy_iter += self.check_accuracy(label, a_l[-1])
                     cost_iter += self.cost_layer.cost(a_l[-1], label, weight=self.weights[-1], reg_const=0)
@@ -91,25 +93,25 @@ class LayerNeuNet:
 
             return self
 
-    def eval(self, data):
+    def eval(self, data, mask):
 
         a_l = [0.0]*self.layers
         a_l[0] = self.layer_types[0].act(data)
 
         for i in range(1, self.layers):
             dot_product = np.dot(self.weights[i - 1], a_l[i - 1]) + self.bias[i - 1]
-            a_l[i] = self.layer_types[i].act(dot_product)
+            a_l[i] = self.layer_types[i].act(dot_product) * mask[i]
 
         return a_l
 
-    def eval_weighted(self, data):
+    def eval_weighted(self, data, mask):
 
         z_l = [0.0]*self.layers
         z_l[0] = data
 
         for i in range(1, self.layers):
             dot_product = np.dot(self.weights[i - 1], z_l[i - 1]) + self.bias[i - 1]
-            z_l[i] = dot_product
+            z_l[i] = dot_product * mask[i]
 
         return z_l
 

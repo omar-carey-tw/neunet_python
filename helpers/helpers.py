@@ -7,16 +7,19 @@ from typing import List
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace('helpers', '')
 
 
-def generate_mask(l_nodes, data_amount, training_iter, probability):
-
+def generate_mask(l_nodes, data_amount, training_iter, probability, save=False):
     mask = [[[1] * len(l_nodes)] * data_amount] * training_iter
 
     if probability is not None:
 
         distribution = determine_dist(probability)
-        mask_file, path_to_mask = mask_metadata(data_amount, training_iter, probability, distribution)
+        direcotry = os.path.join("helpers", "data_files", "mask")
+        file_name_list = ["probability", f"{probability}", "data_amount", f"{data_amount}", "training_iterations",
+                          f"{training_iter}", "l_nodes", f"{l_nodes}"]
 
-        if mask_file not in os.listdir(path_to_mask):
+        checked_file = check_file(direcotry, file_name_list)
+
+        if not checked_file:
             if distribution == 'bern':
 
                 for i in range(training_iter):
@@ -32,13 +35,12 @@ def generate_mask(l_nodes, data_amount, training_iter, probability):
                         for index, val in enumerate(l_nodes):
                             mask[i][j][index] = np.random.randn(val, 1)
 
-            if os.getenv('SAVE_MASK'):
-                print(f"Saving mask: {mask_file}", "\n")
-                pickle.dump(mask, open(path_to_mask + mask_file, 'wb'))
-
+            if save:
+                print(f"Saving mask: {'_'.join(file_name_list)}", "\n")
+                pickle_object(direcotry, file_name_list, mask)
         else:
-            print(f"Loading saved mask: {mask_file}", "\n ")
-            mask = pickle.load(open(path_to_mask + mask_file, 'rb'))
+            print(f"Loading saved mask: {'_'.join(file_name_list)}", "\n ")
+            mask = pickle_load(direcotry, file_name_list)
 
     return mask
 
@@ -93,16 +95,6 @@ def determine_dist(probability):
         distribution = 'bern'
 
     return distribution
-
-
-def mask_metadata(data_amount, training_iter, probability, distribution):
-    mask_file = 'mask_p_' + str(probability) + '_data_' + str(data_amount) + \
-                '_iter_' + str(training_iter) + '_dist_' + str(distribution)
-    dir = '/Users/omarcarey/Desktop/aiproj/NeuNet_python/'
-
-    path_to_mask = (dir + 'helpers/data_files/mask/').replace('tests/', '')
-
-    return mask_file, path_to_mask
 
 
 def check_file(directory, file_name_list: List):

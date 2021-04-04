@@ -1,4 +1,4 @@
-from helpers.helpers import check_file, pickle_object, get_data
+from helpers.helpers import check_file, pickle_object, get_data, generate_mask
 from svc.layernet import ROOT_DIRECTORY
 
 import os
@@ -100,3 +100,18 @@ class TestHelpers:
         assert len(test_data.get("labels")) == test_data_amount
 
         os.remove(test_file_path)
+
+    @pytest.mark.flaky(max_runs=10)
+    def test_generate_mask(self):
+
+        test_l_nodes = [10, 7, 5, 3]
+        test_data_amount = 100
+        test_training_iterations = 100
+        probability = 0.5
+
+        test_mask = generate_mask(test_l_nodes, test_data_amount, test_training_iterations, probability)
+
+        assert len(test_mask) == test_training_iterations
+        assert len(test_mask[0]) == test_data_amount
+        assert len(test_mask[0][0]) == len(test_l_nodes)
+        assert test_mask[0][0][0][0] != 1
