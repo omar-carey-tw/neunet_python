@@ -4,9 +4,6 @@ from helpers.helpers import pickle_object, check_file, pickle_load
 import numpy as np
 import os
 
-# todo: track accuracy and cost
-#  think about saving it as a constructor field in layernet to only have to save one thing
-
 # todo: implement using masks
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace("/svc", "")
@@ -50,7 +47,7 @@ class LayerNeuNet:
 
         return a_l
 
-    def train(self, data_set, label_set, training_iterations, learning_rate=0.5, save=False):
+    def train(self, data_set, label_set, training_iterations, learning_rate=0.5, save=False, reg_const=0):
 
         file_name_list = ["mnist_obj_iter", f"{training_iterations}", f"data_{len(data_set)}",
                           f"learning_rate_{learning_rate}"]
@@ -62,9 +59,15 @@ class LayerNeuNet:
 
         else:
 
+            self.cost = np.zeros(shape=(training_iterations, 1))
+            self.accuracy = np.zeros(shape=(training_iterations, 1))
+
+            training_constant = learning_rate / len(data_set)
+
             for index in range(training_iterations):
 
-                training_constant = learning_rate / len(data_set)
+                accuracy_iter = 0
+                cost_iter = 0
 
                 for i, data in enumerate(data_set):
 
@@ -73,9 +76,15 @@ class LayerNeuNet:
                     a_l = self.eval(data)
                     z_l = self.eval_weighted(data)
 
+                    accuracy_iter += self.check_accuracy(label, a_l[-1])
+                    cost_iter += self.cost_layer.cost(a_l[-1], label, weight=self.weights[-1], reg_const=0)
+
                     delta_output = self.cost_layer.dcostdact(a_l[-1], label) * self.layer_types[-1].dactdz(z_l[-1])
 
-                    self.back_propragate(a_l, z_l, delta_output, training_constant)
+                    self.back_propragate(a_l, z_l, delta_output, training_constant, reg_const=reg_const)
+
+                self.cost[index] = cost_iter / len(data_set)
+                self.accuracy[index] = accuracy_iter / len(data_set)
 
             if save:
                 pickle_object(directory, file_name_list, self)
@@ -104,11 +113,11 @@ class LayerNeuNet:
 
         return z_l
 
-    def back_propragate(self, a_l, z_l, delta_l, training_constant):
+    def back_propragate(self, a_l, z_l, delta_l, training_constant, reg_const):
 
         for i in range(self.layers - 2, -1, -1):
 
-            delta_weights = np.dot(delta_l, a_l[i].transpose())
+            delta_weights = np.dot(delta_l, a_l[i].transpose()) + reg_const * self.weights[i]
             self.bias[i] -= training_constant * delta_l
 
             delta_l = np.dot(self.weights[i].transpose(), delta_l) * self.layer_types[i].dactdz(z_l[i])

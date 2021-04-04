@@ -125,7 +125,7 @@ class TestLayerNeuNet:
 
         checked_accuracy = test_layernet.check_accuracy(test_label, test_output)
 
-        assert checked_accuracy is True
+        assert bool(checked_accuracy) is True
 
     def test_accuracy_false(self, create_test_layernet):
         test_layernet = create_test_layernet()
@@ -134,7 +134,7 @@ class TestLayerNeuNet:
 
         checked_accuracy = test_layernet.check_accuracy(test_label, test_output)
 
-        assert checked_accuracy is False
+        assert bool(checked_accuracy) is False
 
     def test_evaluate_success(self, create_test_layernet):
         layer_types = ["relu", "sigmoid", "sigmoid", "relu"]
@@ -205,6 +205,9 @@ class TestLayerNeuNet:
 
         trained_test_layernet = test_layernet.train(test_train_data, test_train_labels, training_iterations)
 
+        assert len(trained_test_layernet.cost) == training_iterations
+        assert len(trained_test_layernet.accuracy) == training_iterations
+
         for i in range(test_layernet.layers - 1):
             assert np.sum(weights_before_train[i]) != np.sum(trained_test_layernet.weights[i])
             assert np.sum((bias_before_train[i])) != np.sum(trained_test_layernet.bias[i])
@@ -242,6 +245,9 @@ class TestLayerNeuNet:
 
         test_layernet = create_test_layernet()
         saved_test_layernet = test_layernet.train(test_train_data, test_train_labels, training_iterations)
+
+        assert len(saved_test_layernet.cost) == training_iterations
+        assert len(saved_test_layernet.accuracy) == training_iterations
 
         for i in range(test_layernet.layers - 1):
             assert np.sum(trained_seeded_weights[i]) == np.sum(saved_test_layernet.weights[i])
