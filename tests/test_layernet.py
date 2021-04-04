@@ -174,7 +174,6 @@ class TestLayerNeuNet:
     @pytest.mark.flaky(max_runs=5)
     def test_train_success(self, create_test_layernet, get_test_data):
         test_layernet = create_test_layernet()
-
         weights_before_train = copy.deepcopy(test_layernet.weights)
         bias_before_train = copy.deepcopy(test_layernet.bias)
 
@@ -184,11 +183,11 @@ class TestLayerNeuNet:
 
         test_train_data, test_train_labels = get_test_data(data_amount, node_lengths)
 
-        test_layernet.train(test_train_data, test_train_labels, training_iterations)
+        trained_test_layernet = test_layernet.train(test_train_data, test_train_labels, training_iterations)
 
         for i in range(test_layernet.layers - 1):
-            assert np.sum(weights_before_train[i]) != np.sum(test_layernet.weights[i])
-            assert np.sum((bias_before_train[i])) != np.sum(test_layernet.bias[i])
+            assert np.sum(weights_before_train[i]) != np.sum(trained_test_layernet.weights[i])
+            assert np.sum((bias_before_train[i])) != np.sum(trained_test_layernet.bias[i])
 
     def test_train_save(self, create_test_layernet, get_test_data):
         test_layernet = create_test_layernet()
@@ -204,4 +203,29 @@ class TestLayerNeuNet:
 
         assert os.path.exists(test_trained_object)
 
+        os.remove(test_trained_object)
+
+    def test_train_load_previous_training_session(self, create_test_layernet, get_test_data):
+
+        layernet_for_seeding = create_test_layernet()
+
+        data_amount = 1
+        node_lengths = layernet_for_seeding.l_nodes
+        training_iterations = 10
+        test_train_data, test_train_labels = get_test_data(data_amount, node_lengths)
+
+        trained_seeded_layernet = layernet_for_seeding.train(test_train_data, test_train_labels, training_iterations, save=True)
+
+        trained_seeded_weights = copy.deepcopy(trained_seeded_layernet.weights)
+        trained_seeded_bias = copy.deepcopy(trained_seeded_layernet.bias)
+
+        test_layernet = create_test_layernet()
+        saved_test_layernet = test_layernet.train(test_train_data, test_train_labels, training_iterations)
+
+        for i in range(test_layernet.layers - 1):
+            assert np.sum(trained_seeded_weights[i]) == np.sum(saved_test_layernet.weights[i])
+            assert np.sum((trained_seeded_bias[i])) == np.sum(saved_test_layernet.bias[i])
+
+        file_name = f"mnist_obj_iter_{training_iterations}_data_{data_amount}_learning_rate_{0.5}"
+        test_trained_object = os.path.join(ROOT_DIRECTORY, "svc", "trained_objects", file_name)
         os.remove(test_trained_object)

@@ -1,16 +1,16 @@
 from svc.layerfactory import BuildLayerTypes
-from helpers.helpers import pickle_object, check_file
+from helpers.helpers import pickle_object, check_file, pickle_load
 
 import numpy as np
 import os
 
-#todo: write load_pickle helper function, use it in get_data and in train if checked_file
 # todo: track accuracy and cost
 #  think about saving it as a constructor field in layernet to only have to save one thing
 
 # todo: implement using masks
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace("/svc", "")
+
 
 class LayerNeuNet:
     """
@@ -30,6 +30,8 @@ class LayerNeuNet:
         self.weights = None
         self.bias = None
         self.cost_layer = None
+        self.accuracy = []
+        self.cost = []
 
     def evaluate(self, inputs):
         """"
@@ -55,7 +57,9 @@ class LayerNeuNet:
         directory = os.path.join("svc", "trained_objects")
 
         if check_file(directory, file_name_list):
-            pass
+            trained_network = pickle_load(directory, file_name_list)
+            return trained_network
+
         else:
 
             for index in range(training_iterations):
@@ -75,6 +79,8 @@ class LayerNeuNet:
 
             if save:
                 pickle_object(directory, file_name_list, self)
+
+            return self
 
     def eval(self, data):
 
@@ -147,7 +153,9 @@ class LayerNeuNetBuilder:
                 or self.net.layers is None \
                 or self.net.weights is None \
                 or self.net.bias is None \
-                or self.net.cost_layer is None:
+                or self.net.cost_layer is None \
+                or self.net.accuracy != [] \
+                or self.net.cost != []:
 
             raise NameError("One of your constructors is empty")
 
