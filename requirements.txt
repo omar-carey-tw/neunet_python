@@ -4,3 +4,4 @@ dill
 python-mnist==0.6
 flaky
 invoke
+matplotlib==3.4.1
