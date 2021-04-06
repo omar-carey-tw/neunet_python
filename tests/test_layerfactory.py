@@ -1,6 +1,7 @@
-from svc.layerfactory import ReLu, Sigmoid, BuildLayerTypes, Cuadratic
+from svc.layerfactory import ReLu, Sigmoid, BuildLayerTypes, Cuadratic, Exponentialcuadratic
 from numpy.testing import assert_array_equal
 
+import numpy.linalg as la
 import numpy as np
 
 
@@ -81,6 +82,36 @@ class TestCostCuadratic:
         assert_array_equal(test_result, expected)
 
 
+class TestCostExponentialCuadratic:
+
+    def test_exponentialcuadratic_type(self):
+        exponentialcuadtraic = Exponentialcuadratic()
+        assert isinstance(exponentialcuadtraic, Exponentialcuadratic)
+
+    def test_exponentialquadratic_cost_function(self):
+
+        output_act = np.array([.3, .5, .1])
+        training_label = np.array([1, 0, 0])
+        reg_const = 0.5
+        weight = np.array([[1, 2, 3], [4, 5, 6]])
+        expected = sum(1 / 2 * np.exp((output_act - training_label) ** 2) + reg_const / 2 * la.norm(weight, 2) ** 2)
+
+        exponentialquadtraic = Exponentialcuadratic()
+        test_result = exponentialquadtraic.cost(output_act, training_label, weight, reg_const)
+
+        assert test_result == expected
+
+    def test_cuadratic_derivative_function(self):
+        output_act = np.array([.3, .5, .1])
+        training_label = np.array([1, 0, 0])
+        expected = (output_act - training_label) * np.exp((output_act - training_label) ** 2)
+
+        exponentialquadtraic = Exponentialcuadratic()
+        test_result = exponentialquadtraic.dcostdact(output_act, training_label)
+
+        assert_array_equal(test_result, expected)
+
+
 class TestBuildLayerTypes:
 
     def test_layer_builder_success(self):
@@ -114,12 +145,19 @@ class TestBuildLayerTypes:
         assert layer_builder.get("weights") == []
         assert layer_builder.get("bias") == []
 
-    def test_build_cost_layer_success(self):
-        cost_type = "quadratic"
+    def test_build_cost_cuadratic_layer_success(self):
+        cost_type = "cuadratic"
 
         cost_layer = BuildLayerTypes().build_cost_layer(cost_type)
 
         assert isinstance(cost_layer, Cuadratic)
+
+    def test_build_cost_exponentialcuadratic_layer_success(self):
+        cost_type = "exponentialcuadratic"
+
+        cost_layer = BuildLayerTypes().build_cost_layer(cost_type)
+
+        assert isinstance(cost_layer, Exponentialcuadratic)
 
     def test_build_cost_layer_fail(self):
         cost_type = ""

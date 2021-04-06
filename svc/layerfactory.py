@@ -39,9 +39,10 @@ class BuildLayerTypes:
 
         cost_layer = None
 
-        if cost_type == "quadratic":
+        if cost_type == "cuadratic":
             cost_layer = Cuadratic()
-
+        elif cost_type == "exponentialcuadratic":
+            cost_layer = Exponentialcuadratic()
         return cost_layer
 
 
@@ -79,3 +80,12 @@ class Cuadratic:
 
         return result
 
+
+class Exponentialcuadratic:
+
+    def cost(self, output_act, training_label, weight, reg_const):
+        return sum(1 / 2 * np.exp((output_act - training_label) ** 2) + \
+                   reg_const / 2 * la.norm(weight, 2) ** 2)
+
+    def dcostdact(self, output_act, training_label):
+        return (output_act - training_label) * np.exp((output_act - training_label) ** 2)

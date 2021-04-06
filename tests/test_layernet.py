@@ -28,7 +28,7 @@ class TestLayerNeuNetBuilder:
         assert test_layerbuilder.net.layers is not None
 
     def test_set_cost(self):
-        cost_type = "quadratic"
+        cost_type = "cuadratic"
 
         test_layernetbuilder = LayerNeuNetBuilder().set_cost(cost_type)
 
@@ -36,7 +36,7 @@ class TestLayerNeuNetBuilder:
 
     def test_build_success(self):
         l_nodes = [1, 2, 3, 4]
-        cost_type = "quadratic"
+        cost_type = "cuadratic"
         layer_types = ["relu"] * len(l_nodes)
 
         test_layernet = LayerNeuNetBuilder(). \
@@ -73,7 +73,7 @@ class TestLayerNeuNetBuilder:
 
 @pytest.fixture
 def create_test_layernet():
-    def _test_layernet(l_nodes=[10, 7, 5, 3], layer_types="relu", cost_type="quadratic"):
+    def _test_layernet(l_nodes=[10, 7, 5, 3], layer_types="relu", cost_type="exponentialcuadratic"):
 
         if isinstance(layer_types, list):
             layer_types_list = layer_types
