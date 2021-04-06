@@ -6,8 +6,8 @@ import os
 
 ROOT_DIRECTORY = os.path.dirname(os.path.abspath(__file__)).replace("/svc", "")
 
-# todo: Add a new more efficient cost function and tests
-# todo: delete old neunet and testneunet files
+#todo: fix scripts and main file to use layernet
+#todo: look into convolution networks????
 
 
 class LayerNeuNet:

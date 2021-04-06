@@ -27,8 +27,15 @@ class TestLayerNeuNetBuilder:
         assert test_layerbuilder.net.l_nodes is not None
         assert test_layerbuilder.net.layers is not None
 
-    def test_set_cost(self):
+    def test_set_cuadratic_cost(self):
         cost_type = "cuadratic"
+
+        test_layernetbuilder = LayerNeuNetBuilder().set_cost(cost_type)
+
+        assert test_layernetbuilder.net.cost_layer is not None
+
+    def test_set_exponentialcuadratic_cost(self):
+        cost_type = "exponentialcuadratic"
 
         test_layernetbuilder = LayerNeuNetBuilder().set_cost(cost_type)
 

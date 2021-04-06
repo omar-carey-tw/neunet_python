@@ -2,8 +2,6 @@ from typing import *
 import numpy as np
 import numpy.linalg as la
 
-# todo: add checks to see if components actually got set (check to see if initated lists are still empty after  "setting"
-
 
 class BuildLayerTypes:
 
